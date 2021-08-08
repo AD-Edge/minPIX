@@ -19,6 +19,7 @@ setImagePath('assets/images/');
 kontra.initKeys();
 
 var textOutput = document.getElementById("exportText");
+var textOutputByte = document.getElementById("exportText2_byt");
 
 //Grid Calcs / variables
 var gridX = 8; //number of grid spaces, from 2 - 32
@@ -408,6 +409,16 @@ function CleanUpGrid() {
 
 }
 
+function RecalcByteEstimate() {
+
+    let area = gridX * gridY;
+    let byteNum = area/8; //8 bits in a byte
+
+    textOutputByte.value = '~(WIP)~ estimated bytes: ' + byteNum + '\n'
+
+
+}
+
 function BuildPixelGrid() {
 
     //grid area container
@@ -443,6 +454,8 @@ function BuildPixelGrid() {
             createGrid(i*gDim,j*gDim);
         }
     }
+
+    RecalcByteEstimate();
 
 }
 
