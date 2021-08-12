@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
         <head>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
             <style> canvas { background-color: white; border: 1px solid black;}</style>
+            <link rel="stylesheet" href="src/style.css">
             <meta name="viewport" content="user-scalable=0, initial-scale=1, minimum-scale=1, maximum-scale=1, width=device-width, minimal-ui=1">
             <title>minPIX_Kontra</title>
         </head>
-
+        
         <body>
             <!--<script src="src/lib/kontra.min.js"></script>-->
             <script src="src/lib/kontra.js"></script>
             <script type="module" src="src/main.js"></script>
-            
+            <script src="src/select.js"></script>
+
             <p>[Kontra] minPIX</p>
 
             <canvas id="canvasMain" width="640" height="320"></canvas>
@@ -21,7 +24,274 @@
                 <input type="text" maxlength="3" size="1" id="hname" name="hname" value="8"><br><br>
             </form>  -->
 
-            <form>    
+            <form>
+                <table class="bottomBorder2"> 
+                    <tr> 
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(0)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>00       
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#000000" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(1)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>01       
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#FFFFFF" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(2)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>02       
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#880000" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(3)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>03       
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#AAFFEE" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(4)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>04       
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#CC44CC" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(5)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>05       
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#00CC55" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(6)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>06
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#0000AA" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(7)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>07
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#EEEE77" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                    </tr>
+    
+                    <tr>
+                        <td><br></td>
+                    </tr>
+    
+                    <tr> 
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(8)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>08     
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#DD8855" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv(9)">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>09
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#664400" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv('A')">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>10
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#FF7777" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv('B')">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>11    
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#333333" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv('C')">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>12
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#777777" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv('D')">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>13
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#AAFF66" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv('E')">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>14
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#0088FF" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+    
+                        <td> </td>
+    
+                        <td>COL
+                            <label class="container">
+                              <input type="radio" name="radio" onclick="ShowHideDiv('F')">
+                              <span class="checkmark"></span>
+                            </label> <br>
+                        </td>
+                        <td>15
+                            <div id="col14">
+                            <input type="color" id="html5colorpicker" 
+                            onchange="clickColor(0, -1, -1, 5)" value="#BBBBBB" 
+                            style="width:20px;">
+                            </div>
+                        </td>
+                    </tr>
+                        
+                </table>
+    
+
+        </div>
+            <BR>
                 
 <textarea name="text" rows="4" cols="20" id="exportText2_byt" wrap="soft" >
 [byte estimate]
@@ -44,6 +314,7 @@ You can customize the size of the grid with +/-
 :D
 </textarea>
             </form>
-        </body>
 
+
+        </body>
 </html>

@@ -512,6 +512,9 @@ function RemoveGridRow() {
     cells = cells.filter(sprite => sprite.isAlive)
 }
 
+export function TriggerColChange() {
+    console.log('trigger colour change');
+}
 
 
 //GameLoop setup
