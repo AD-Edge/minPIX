@@ -21,6 +21,10 @@ kontra.initKeys();
 var textOutput = document.getElementById("exportText");
 var textOutputByte = document.getElementById("exportText2_byt");
 
+//colour detection
+var colSelect = document.getElementById('colourSelect')
+var colCurrent = null; 
+
 //Grid Calcs / variables
 var gridX = 8; //number of grid spaces, from 2 - 32
 var gridY = 8; //number of grid spaces, from 2 - 32
@@ -372,18 +376,21 @@ function createGrid(xIn, yIn) {
                 anchor: {x: 0.5, y: 0.5}
             },
             onDown() {
-                this.color = 'red'
-                //this.y +=2;
+                GetColourValue();
+                //colHEX = rgbToHex(colRGB);
+                console.log("col in HEX: " + colCurrent);
+                this.color = colCurrent;
+                
             },
             onUp() {
-                this.color = 'grey'
+                //this.color = 'grey'
                 //this.y -=2;
             },
             onOver() {
-                this.color = '#AAAAAA'
+                //this.color = '#AAAAAA'
             },
             onOut: function() {
-                this.color = 'grey'
+                //this.color = 'grey'
                 
             }
         });
@@ -393,6 +400,18 @@ function createGrid(xIn, yIn) {
 
         Area1.addChild(gridSQR);
 }
+
+function componentToHex(comp) {
+    var hex = comp.toString(16); 
+
+    return hex.length == 1 ? "0" + hex : hex;
+
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
 
 function CleanUpGrid() {
     if(cells.length > 0) {
@@ -512,10 +531,11 @@ function RemoveGridRow() {
     cells = cells.filter(sprite => sprite.isAlive)
 }
 
-export function TriggerColChange() {
-    console.log('trigger colour change');
+function GetColourValue() { 
+    colCurrent = colSelect.style.backgroundColor;
+    console.log('selected colour: ' + colCurrent);  
+    
 }
-
 
 //GameLoop setup
 //Requires update & render functions
