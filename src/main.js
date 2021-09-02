@@ -80,16 +80,43 @@ var tctx=tempCanvas.getContext("2d");
 //set background
 renderIMG.setAttribute('style', 'background-color:#666666')
 
-resizeTo(renderIMG, resize);
+//initial setting of render image canvas
+ResizeTo(renderIMG, resize);
 
-function drawTempArt() {
-    rdCTX.fillStyle = "rgba("+255+","+255+","+255+","+(255/255)+")";
+function DrawRenderPixel(col, x, y) {
+    rdctx.fillStyle = col;
+    rdctx.fillRect( (x/2), (y/2), resize, resize );
+}
 
+function ReBuildSprite() {
+    //set back to 1-1 scale 
+    //ResizeTo(renderIMG, 1/resize);
+    //redraw pixels
+    for(let i = 0; i< cells.length; i++) {
+        //get colour
+        var gCol = cells[i].color;
+        //draw
+        console.log("draw");
+        DrawRenderPixel(gCol, cells[i].x, cells[i].y);  
+    }
+    //rescale
+    //ResizeTo(renderIMG, resize);
+
+}
+
+function ReSetSprite() {
+    //set back to 1-1 scale
+    ResizeTo(renderIMG, 1/resize);
+    //resize
+    renderIMG.width = gridX;
+    renderIMG.height = gridY;
+    //rescale
+    ResizeTo(renderIMG, resize);
 
 }
 
 //resize canvas with temp canvas 'bounce'
-function resizeTo(canvas,pct){
+function ResizeTo(canvas,pct){
     var cw=canvas.width;
     var ch=canvas.height;
     tempCanvas.width=cw;
@@ -127,42 +154,6 @@ let gridSQR = Sprite({
 });
 track(gridSQR);
 //console.log(gridSQR);
-
-//Button with text and click support
-// let buttonSQR = Button({
-//     x:100,
-//     y:200,
-//     width: 32,
-//     height: 32,
-//     anchor: {x:0.5, y:0.5},
-//     color: 'black',
-
-//     // text properties
-//     text: {
-//         text: 'X',
-//         color: 'black',
-//         font: '20px Arial, sans-serif',
-//         anchor: {x: 0.5, y: 0.5}
-//     },
-//     onDown() {
-//         this.color = 'red'
-//         this.y +=2;
-//     },
-//     onUp() {
-//         this.color = 'black'
-//         this.y -=2;
-//     },
-//     onOver() {
-//         this.color = 'grey'
-//     },
-//     onOut: function() {
-//         this.color = 'black'
-//     }
-// });
-// track(buttonSQR);
-//let SideUI = null;
-
-
 
 const SideUI = Sprite({
     type: 'obj',
@@ -400,6 +391,7 @@ function createBox(xSize, ySize, par, xLoc, yLoc) {
 
 function createGrid(xIn, yIn) {
         const gridSQR = Sprite({
+            type: '0',
             x: xIn,
             y: yIn,
             color: 'grey',
@@ -408,9 +400,9 @@ function createGrid(xIn, yIn) {
 
             // text properties
             text: {
-                text: 'X',
+                text: '0',
                 color: 'black',
-                font: '10px Arial, sans-serif',
+                font: '0px Arial, sans-serif',
                 anchor: {x: 0.5, y: 0.5}
             },
             onDown() {
@@ -418,6 +410,10 @@ function createGrid(xIn, yIn) {
                 //colHEX = rgbToHex(colRGB);
                 console.log("col in HEX: " + colCurrent);
                 this.color = colCurrent;
+                this.type = 1;
+
+                //send to render Canvas
+                ReBuildSprite();
                 
             },
             onUp() {
@@ -425,11 +421,14 @@ function createGrid(xIn, yIn) {
                 //this.y -=2;
             },
             onOver() {
-                //this.color = '#AAAAAA'
+                if(this.type == 0) {
+                    this.color = '#AAAAAA'
+                }
             },
             onOut: function() {
-                //this.color = 'grey'
-                
+                if(this.type == 0) {
+                    this.color = 'grey'
+                }
             }
         });
     
@@ -487,8 +486,8 @@ function BuildPixelGrid() {
         height: areaY,
         
         render() {
-            this.context.setLineDash([20,10]);
-            this.context.lineWidth = 3;
+            //this.context.setLineDash([20,10]);
+            this.context.lineWidth = 4;
             this.context.strokeStyle = 'black';
             this.context.strokeRect(0, 0, this.width, this.height);
         }
@@ -533,7 +532,7 @@ function UpdateGridX(i, pos) {
         uiTexts_01[i].text = `${gridX}`;
     }
     
-    resizeTo(renderIMG, resize);
+    ReSetSprite();
     //trigger grid redraw
     redraw = true;
     return;
@@ -553,11 +552,11 @@ function UpdateGridY(i, pos) {
         renderIMG.height = gridY;
         //console.log(uiTexts_01[0]);
         uiTexts_01[i].text = `${gridY}`;
-
+        
         RemoveGridRow();
     }
-
-    resizeTo(renderIMG, resize);
+    
+    ReSetSprite();
     //trigger grid redraw
     redraw = true;
     return;
