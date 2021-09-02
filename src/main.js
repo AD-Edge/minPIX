@@ -60,6 +60,47 @@ var tX = null;
 var widthUIX = 60;
 var heightUIX = 130;
 
+let Area1 = null;
+let Area1Col = null;
+
+var sideUIX = canvas.width/4;
+
+
+//experimental image gen
+const testImg = new Image();
+//canvas for rendering
+const renderIMG = document.getElementById('renderIMG');
+var rdctx = renderIMG.getContext("2d");
+renderIMG.width = gridX;
+renderIMG.height = gridY;
+var resize = 8;
+var tempCanvas=document.createElement("canvas");
+var tctx=tempCanvas.getContext("2d");
+
+//set background
+renderIMG.setAttribute('style', 'background-color:#666666')
+
+resizeTo(renderIMG, resize);
+
+function drawTempArt() {
+    rdCTX.fillStyle = "rgba("+255+","+255+","+255+","+(255/255)+")";
+
+
+}
+
+//resize canvas with temp canvas 'bounce'
+function resizeTo(canvas,pct){
+    var cw=canvas.width;
+    var ch=canvas.height;
+    tempCanvas.width=cw;
+    tempCanvas.height=ch;
+    tctx.drawImage(canvas,0,0);
+    canvas.width*=pct;
+    canvas.height*=pct;
+    var ctx=canvas.getContext('2d');
+    ctx.drawImage(tempCanvas,0,0,cw,ch,0,0,cw*pct,ch*pct);
+  }
+
 //GridSquare, sprite with click support
 let gridSQR = Sprite({
     x: 200,
@@ -119,13 +160,10 @@ track(gridSQR);
 //     }
 // });
 // track(buttonSQR);
-let Area1 = null;
-let Area1Col = null;
 //let SideUI = null;
 
 
 
-var sideUIX = canvas.width/4;
 const SideUI = Sprite({
     type: 'obj',
     x: canvas.width - sideUIX,
@@ -483,16 +521,19 @@ function UpdateGridX(i, pos) {
         //increment value
         gridX++;
         areaX += 16;
+        renderIMG.width = gridX;        
         //console.log(uiTexts_01[0]);
         uiTexts_01[i].text = `${gridX}`;
     } else if (!pos) {
         //increment value
         gridX--;
         areaX -= 16;
+        renderIMG.width = gridX;
         //console.log(uiTexts_01[0]);
         uiTexts_01[i].text = `${gridX}`;
     }
     
+    resizeTo(renderIMG, resize);
     //trigger grid redraw
     redraw = true;
     return;
@@ -502,18 +543,21 @@ function UpdateGridY(i, pos) {
         //increment value
         gridY++;
         areaY += 16;
+        renderIMG.height = gridY;
         //console.log(uiTexts_01[0]);
         uiTexts_01[i].text = `${gridY}`;
     } else if (!pos) {
         //increment value
         gridY--;
         areaY -= 16;
+        renderIMG.height = gridY;
         //console.log(uiTexts_01[0]);
         uiTexts_01[i].text = `${gridY}`;
 
         RemoveGridRow();
     }
 
+    resizeTo(renderIMG, resize);
     //trigger grid redraw
     redraw = true;
     return;

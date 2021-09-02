@@ -11,8 +11,12 @@
         <body>
             <h1>[Kontra] minPIX</h1>
 
-            <canvas id="canvasMain" width="640" height="320"></canvas>
-            
+            <div id='d1' style="position:relative; z-index:2">
+                <canvas id="canvasMain" width="640" height="320"></canvas>
+                <div id='d2' style="position:absolute; top:160px; left:526px; z-index:1">
+                    <canvas id="renderIMG" width="64" height="64"></canvas>
+                </div>
+            </div>
             <!-- <form action="/action_page.php">
                 <label for="wname">Dimensions</label><br>
                 <input type="text" maxlength="3" size="1" id="wname" name="wname" value="8"> x 
