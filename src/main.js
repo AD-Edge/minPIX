@@ -5,7 +5,6 @@ const { init, GameLoop, Text, load, setImagePath, Sprite,
 //get components from index
 const { canvas, context } = init();
 
-
 //console.log(canvas);
 console.log(canvas);
 console.log(context);
@@ -20,17 +19,18 @@ kontra.initKeys();
 
 var textOutput = document.getElementById("exportText");
 var textOutputByte = document.getElementById("exportText2_byt");
+var textOutputBin = document.getElementById("exportText_bin");
 
 //colour detection
 var colSelect = document.getElementById('colourSelect')
 var colCurrent = null; 
 
 //Grid Calcs / variables
-var gridX = 8; //number of grid spaces, from 2 - 32
-var gridY = 8; //number of grid spaces, from 2 - 32
-
-var areaX = 16 * gridX; //size of grid area 
-var areaY = 16 * gridY;
+var gridX = 4; //number of grid spaces, from 2 - 32
+var gridY = 4; //number of grid spaces, from 2 - 32
+var gridPix = 16; //number of pixels in each grid space
+var areaX = gridPix * gridX; //size of grid area 
+var areaY = gridPix * gridY;
 
 var gDim = areaX / gridX;
 var pixThic = 1;
@@ -69,13 +69,20 @@ var sideUIX = canvas.width/4;
 //experimental image gen
 const testImg = new Image();
 //canvas for rendering
-const renderIMG = document.getElementById('renderIMG');
+var renderIMG = document.getElementById('renderIMG');
 var rdctx = renderIMG.getContext("2d");
 renderIMG.width = gridX;
 renderIMG.height = gridY;
-var resize = 8;
+var resize = 1;
 var tempCanvas=document.createElement("canvas");
 var tctx=tempCanvas.getContext("2d");
+
+//image to bytes
+var imageData;
+const imageDataByteLen = document.querySelector('#imagedata-byte-length');
+const bufferByteLen = document.querySelector('#arraybuffer-byte-length');
+const mimeType = 'image/png';
+const imageOut = document.querySelector('#image-out');
 
 //set background
 renderIMG.setAttribute('style', 'background-color:#666666')
@@ -85,7 +92,8 @@ ResizeTo(renderIMG, resize);
 
 function DrawRenderPixel(col, x, y) {
     rdctx.fillStyle = col;
-    rdctx.fillRect( (x/2), (y/2), resize, resize );
+    rdctx.fillRect( (x/(gridPix/resize)), (y/(gridPix/resize)), resize, resize );
+    console.log(x + ", " + y);
 }
 
 function ReBuildSprite() {
@@ -95,9 +103,10 @@ function ReBuildSprite() {
     for(let i = 0; i< cells.length; i++) {
         //get colour
         var gCol = cells[i].color;
-        //draw
-        console.log("draw");
-        DrawRenderPixel(gCol, cells[i].x, cells[i].y);  
+        //draw only where pixels are
+        if(cells[i].type == 1) {
+            DrawRenderPixel(gCol, cells[i].x, cells[i].y);  
+        }
     }
     //rescale
     //ResizeTo(renderIMG, resize);
@@ -126,14 +135,123 @@ function ResizeTo(canvas,pct){
     canvas.height*=pct;
     var ctx=canvas.getContext('2d');
     ctx.drawImage(tempCanvas,0,0,cw,ch,0,0,cw*pct,ch*pct);
-  }
+}
+
+function ConvertCanvastoImageData() {
+    imageData = rdctx.getImageData(0, 0, renderIMG.width, renderIMG.height);
+    imageDataByteLen.textContent = imageData.data.byteLength + ' bytes.';
+    console.log(imageData);
+
+    // Convert canvas to Blob, then Blob to ArrayBuffer.
+    renderIMG.toBlob((blob) => {
+    const reader = new FileReader();
+    reader.addEventListener('loadend', () => {
+        const arrayBuffer = reader.result;
+        bufferByteLen.textContent = arrayBuffer.byteLength + ' bytes.';
+
+          // Dispay Blob content in an Image.
+          const blob = new Blob([arrayBuffer], {type: mimeType});
+          imageOut.src = URL.createObjectURL(blob);
+          //console.log(arrayBuffer);
+
+          //var bufView = new Uint8Array(arrayBuffer);
+          var bufViewID = new Uint8Array(imageData.data);
+          //output to webpage
+          //textOutputBin.innerHTML = "[binary output]\n" + bufViewID;
+
+          SliceData(bufViewID);
+        });
+        reader.readAsArrayBuffer(blob);
+    }, mimeType);
+    
+}
+
+//operate on image data
+function SliceData(da) {
+    const myArr = da.toString().split(",");
+    const genArr = [];
+    var it = 0; //iterator
+
+    //Transcribe colour data
+    //Remove alpha
+    for(var i=0; i<myArr.length; i++) {
+        //find first non zero 
+        
+        //get colour - check against colour register array
+        
+        //set colour in array if new
+        
+        //change to given register value
+        //handle colour value
+        if((myArr[i] != 0) && (it <=3)) { 
+            genArr[i] = 1;
+        }
+        //handle no colour
+        if(myArr[i] == 0) { 
+            genArr[i] = 0;
+            //myArr[i] = '';   //undefined
+        }
+        
+        //handle alpha-skip
+        if(it >= 3) {
+            genArr.splice(i, 1); //remove alpha value
+            //i--;
+            it = 0; //reset
+        } else {
+            it++    //increment
+        }
+    }
+
+    it=0 //reset iterator
+    var BIstr = '';
+    var bytes = [];
+    //Convert generated array to binary, remove RGB
+    for(var i=0; i<genArr.length; i++) {
+        
+        if(it <= 8) {
+            if(genArr[i] == 1) {
+                BIstr += genArr[i].toString();
+            } else {
+                BIstr += '0';
+            }
+            it++;
+
+            i+=2;
+        } 
+        
+        if(it == 8) {
+            console.log("byte generated: " + BIstr);
+            it = 0;
+
+            bytes[bytes.length] = BIstr;
+            BIstr = '';
+        }
+
+
+    }
+    //Convert to unicode
+    var b = parseInt( bytes[0], 2 );
+    var c = parseInt( bytes[1], 2 );
+
+    console.log(b);
+    console.log(c);
+    console.log(String.fromCharCode(b));
+    console.log(String.fromCharCode(c));
+    
+    //output to webpage
+    //var bufViewID = new Uint8Array(myArr.data);
+    console.log("bytes estimated: " + bytes.length);
+    //console.log("estimated bytes: " + genArr.length);
+    textOutputBin.innerHTML = "[binary output]\n" + genArr;
+}
+
 
 //GridSquare, sprite with click support
 let gridSQR = Sprite({
     x: 200,
     y: 200,
-    width: 20,
-    height: 20,
+    width: gridPix+4,
+    height: gridPix+4,
     color: 'black',
     
     onDown() {
@@ -218,6 +336,7 @@ butBlu.onload = () => {
             this.image = butBlu
             this.y +=5;
             GenerateText();
+            ConvertCanvastoImageData();
         },
         onUp() {
             this.image = butGry
@@ -408,7 +527,7 @@ function createGrid(xIn, yIn) {
             onDown() {
                 GetColourValue();
                 //colHEX = rgbToHex(colRGB);
-                console.log("col in HEX: " + colCurrent);
+                //console.log("col in HEX: " + colCurrent);
                 this.color = colCurrent;
                 this.type = 1;
 
