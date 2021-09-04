@@ -5,10 +5,6 @@ const { init, GameLoop, Text, load, setImagePath, Sprite,
 //get components from index
 const { canvas, context } = init();
 
-//console.log(canvas);
-console.log(canvas);
-console.log(context);
-
 //Initilize interactions
 initPointer();
 
@@ -20,6 +16,8 @@ kontra.initKeys();
 var textOutput = document.getElementById("exportText");
 var textOutputByte = document.getElementById("exportText2_byt");
 var textOutputBin = document.getElementById("exportText_bin");
+var textOutputCmp = document.getElementById("exportText_cmp");
+
 
 //colour detection
 var colSelect = document.getElementById('colourSelect')
@@ -84,6 +82,10 @@ const bufferByteLen = document.querySelector('#arraybuffer-byte-length');
 const mimeType = 'image/png';
 const imageOut = document.querySelector('#image-out');
 
+var hexArr = [];
+var colArr = [];
+var genArr = [];
+
 //set background
 renderIMG.setAttribute('style', 'background-color:#666666')
 
@@ -93,13 +95,14 @@ ResizeTo(renderIMG, resize);
 function DrawRenderPixel(col, x, y) {
     rdctx.fillStyle = col;
     rdctx.fillRect( (x/(gridPix/resize)), (y/(gridPix/resize)), resize, resize );
-    console.log(x + ", " + y);
+    //console.log(x + ", " + y);
 }
 
 function ReBuildSprite() {
     //set back to 1-1 scale 
     //ResizeTo(renderIMG, 1/resize);
     //redraw pixels
+    
     for(let i = 0; i< cells.length; i++) {
         //get colour
         var gCol = cells[i].color;
@@ -108,9 +111,10 @@ function ReBuildSprite() {
             DrawRenderPixel(gCol, cells[i].x, cells[i].y);  
         }
     }
+
     //rescale
     //ResizeTo(renderIMG, resize);
-
+    
 }
 
 function ReSetSprite() {
@@ -140,69 +144,127 @@ function ResizeTo(canvas,pct){
 function ConvertCanvastoImageData() {
     imageData = rdctx.getImageData(0, 0, renderIMG.width, renderIMG.height);
     imageDataByteLen.textContent = imageData.data.byteLength + ' bytes.';
-    console.log(imageData);
+    //console.log(imageData);
 
     // Convert canvas to Blob, then Blob to ArrayBuffer.
     renderIMG.toBlob((blob) => {
     const reader = new FileReader();
+
     reader.addEventListener('loadend', () => {
         const arrayBuffer = reader.result;
         bufferByteLen.textContent = arrayBuffer.byteLength + ' bytes.';
+            // Dispay Blob content in an Image.
+            const blob = new Blob([arrayBuffer], {type: mimeType});
+            imageOut.src = URL.createObjectURL(blob);
+            //console.log(arrayBuffer);
 
-          // Dispay Blob content in an Image.
-          const blob = new Blob([arrayBuffer], {type: mimeType});
-          imageOut.src = URL.createObjectURL(blob);
-          //console.log(arrayBuffer);
+            //var bufView = new Uint8Array(arrayBuffer);
+            var bufViewID = new Uint8Array(imageData.data);
+            //output to webpage
+            //textOutputBin.innerHTML = "[binary output]\n" + bufViewID;
 
-          //var bufView = new Uint8Array(arrayBuffer);
-          var bufViewID = new Uint8Array(imageData.data);
-          //output to webpage
-          //textOutputBin.innerHTML = "[binary output]\n" + bufViewID;
+            SliceData(bufViewID);
 
-          SliceData(bufViewID);
+            //run export text gen 
+            //has to run in here, at the end of 'loadend'
+            GenerateExportText();
+
         });
+
         reader.readAsArrayBuffer(blob);
     }, mimeType);
     
+
+    
 }
 
-//operate on image data
-function SliceData(da) {
-    const myArr = da.toString().split(",");
-    const genArr = [];
+//run through arrayIN
+//checking colours col
+//output unique colours to arrayOut
+function CheckCol(arrayIn, arrayGen, arrayCol) {
+    var addCol = true;
     var it = 0; //iterator
+    
+    // //quick check colours 
+    // arrayCol.length = 0;
+    // arrayCol = [];
 
     //Transcribe colour data
     //Remove alpha
-    for(var i=0; i<myArr.length; i++) {
-        //find first non zero 
-        
+    //Detect colours
+    for(var i=0; i<arrayIn.length; i++) {
+        //for every new R-G-B, check colour 
+        if(it == 0) {     
+            if(arrayIn[i] >= 0) { //first element 
+                var rgb = arrayIn[i] + ',' + arrayIn[i+1] + ',' + arrayIn[i+2];
+                var a = arrayIn[i+3]; //alpha 
+            
+                console.log("rgb: " + rgb + " a: " + a);
+
+                if(a != 0) { //alpha skip (empty cell)
+                    //add first colour 
+                    if(arrayCol.length == 0) {
+                        arrayCol[arrayCol.length] = rgb;
+                        console.log("new colour detected: " + rgb);  
+                    } else {
+                        //check if new colour is a previous colour?
+                        for(var j=0; j<arrayCol.length; j++) {
+                            if(rgb.toString() == arrayCol[j].toString()) {
+                                addCol = false;
+                            }
+                        }
+                        
+                        if(addCol) {
+                            arrayCol[arrayCol.length] = rgb;
+                            console.log("new colour detected: " + rgb);
+                        }
+                
+                        addCol = true;
+                    }
+                }
+            }
+        }
+
         //get colour - check against colour register array
         
         //set colour in array if new
         
         //change to given register value
         //handle colour value
-        if((myArr[i] != 0) && (it <=3)) { 
-            genArr[i] = 1;
+        if((arrayIn[i] != 0) && (it <=3)) { 
+            arrayGen[i] = 1;
         }
         //handle no colour
-        if(myArr[i] == 0) { 
-            genArr[i] = 0;
+        if(arrayIn[i] == 0) { 
+            arrayGen[i] = 0;
             //myArr[i] = '';   //undefined
         }
-        
-        //handle alpha-skip
+    
         if(it >= 3) {
-            genArr.splice(i, 1); //remove alpha value
-            //i--;
+            arrayGen.splice(i, 1); //remove alpha value
             it = 0; //reset
         } else {
             it++    //increment
         }
+    
     }
 
-    it=0 //reset iterator
+    //console.log("FINISHED processing colour array, number of colours: " + arrayCol.length);
+
+}
+
+//operate on image data
+function SliceData(da) {
+    const myArr = da.toString().split(",");
+    var it = 0; //iterator
+
+    //reset hex array
+    hexArr.length = 0;
+    hexArr = [];
+    
+    CheckCol(myArr, genArr, colArr);
+    console.log("number of colours detected: " + colArr.length);
+
     var BIstr = '';
     var bytes = [];
     //Convert generated array to binary, remove RGB
@@ -211,8 +273,10 @@ function SliceData(da) {
         if(it <= 8) {
             if(genArr[i] == 1) {
                 BIstr += genArr[i].toString();
-            } else {
+            } else if(genArr[i] == 0) {
                 BIstr += '0';
+            } else {
+                it--;
             }
             it++;
 
@@ -226,23 +290,33 @@ function SliceData(da) {
             bytes[bytes.length] = BIstr;
             BIstr = '';
         }
-
-
     }
-    //Convert to unicode
-    var b = parseInt( bytes[0], 2 );
-    var c = parseInt( bytes[1], 2 );
 
-    console.log(b);
-    console.log(c);
-    console.log(String.fromCharCode(b));
-    console.log(String.fromCharCode(c));
+    //console.log(myArr);
+    //console.log(genArr);
     
+    //Convert to unicode
+    // var b = parseInt( bytes[0], 2 );
+    // var c = parseInt( bytes[1], 2 );
+    // console.log(b);
+    // console.log(c);
+
+    //console.log(String.fromCharCode(b));
+    //console.log(String.fromCharCode(c));
+    
+    //Build hex array
+    for(var i=0; i<bytes.length; i++) {
+        var hexa = parseInt(bytes[i], 2).toString(16).toUpperCase();
+        console.log("HEX: " + hexa);
+        hexArr[hexArr.length] = hexa;
+    }
+
     //output to webpage
-    //var bufViewID = new Uint8Array(myArr.data);
-    console.log("bytes estimated: " + bytes.length);
+    var bufViewID = new Uint8Array(myArr.data);
+    console.log("Bytes Estimated: " + bytes.length);
     //console.log("estimated bytes: " + genArr.length);
-    textOutputBin.innerHTML = "[binary output]\n" + genArr;
+    textOutputBin.innerHTML = "[Binary Output]\n" + genArr;
+    textOutputCmp.innerHTML = "[Compressed Output]\n" + hexArr;
 }
 
 
@@ -335,7 +409,6 @@ butBlu.onload = () => {
         onDown() {
             this.image = butBlu
             this.y +=5;
-            GenerateText();
             ConvertCanvastoImageData();
         },
         onUp() {
@@ -456,18 +529,32 @@ butBlu.onload = () => {
     SideUI.addChild(buttonHSub);
 };
 
-function GenerateText() {
+function GenerateExportText() {
     //debug
     //textGen.text = 'Generated (' + gridX + "," + gridY + ') data for current sprite';
     //output to html page
-    textOutput.value = '~Generating Export Data~' + '\n'
-    + 'Sprite dimensions: ' + gridX + "x" + gridY + '\n'
-    + '\n'
+    
+    var colString ='';
+    for(var i=0; i<colArr.length; i++) {
+        if(i != colArr.length-1) {
+            colString += colArr[i] + ',';
+        } else {
+            colString += colArr[i];
+        }
+        colString += "\n"
+    }
+
+    textOutput.value = '[Generated Export Data]' + '\n'
+    + 'Sprite dimensions: ' + gridX + "x" + gridY + "\nColours: " + colArr.length + '\n'
+    + colString
+    + '\n' + '\n'
 
     + '////////////////Copy the below data segment////////////////' + '\n'
     + '\n'
 
-    + '~ Data ~'
+    + gridX + ',' + gridY + ',' + hexArr
+
+
     + '\n \n'
     + '////////////////          End Data         ////////////////';
 }
@@ -477,7 +564,6 @@ createBox(32, 32, SideUI, 45, 4);
 createBox(32, 32, SideUI, 115, 4);
 createText(SideUI, 60, 20, gridX);
 createText(SideUI, 130, 20, gridY);
-
 
 function createText(par, xLoc, yLoc, i) {
         const tex = Text({
@@ -513,7 +599,7 @@ function createGrid(xIn, yIn) {
             type: '0',
             x: xIn,
             y: yIn,
-            color: 'grey',
+            color: '#999999',
             width: gDim - pixThic,
             height: gDim - pixThic,
 
@@ -546,7 +632,8 @@ function createGrid(xIn, yIn) {
             },
             onOut: function() {
                 if(this.type == 0) {
-                    this.color = 'grey'
+                    //this.color = 'rgb(153,153,153)';
+                    this.color = '#999999'
                 }
             }
         });
@@ -587,10 +674,15 @@ function CleanUpGrid() {
 function RecalcByteEstimate() {
 
     let area = gridX * gridY;
-    let byteNum = area/8; //8 bits in a byte
+    let byteNum = area/4; //8 bits in a byte
+    let gridString = gridX.toString() + "," + gridY.toString();
+    //console.log("Grid string " + gridString + " - " + gridString.length);
 
-    textOutputByte.value = '~(WIP)~ estimated bytes: ' + byteNum + '\n'
+    byteNum += (byteNum*1)-2; //commas 
+    byteNum += colArr.length; //colour register (!No accurate)
+    byteNum += gridString.length; //size values
 
+    textOutputByte.value = '(WIP) Estimated: \n~' + byteNum + ' bytes\n'
 
 }
 
@@ -672,7 +764,6 @@ function UpdateGridY(i, pos) {
         //console.log(uiTexts_01[0]);
         uiTexts_01[i].text = `${gridY}`;
         
-        RemoveGridRow();
     }
     
     ReSetSprite();
@@ -681,22 +772,9 @@ function UpdateGridY(i, pos) {
     return;
 }
 
-function RemoveGridRow() {
-    for(let i=gridY; i > 0; i--) {
-        let cell = cells[i];
-        cell.ttl = 0;
-    }
-
-    console.log(cells[0]);
-    //cells[0].ttl = 0;
-    
-    cells = cells.filter(sprite => sprite.isAlive)
-}
-
 function GetColourValue() { 
     colCurrent = colSelect.style.backgroundColor;
-    console.log('selected colour: ' + colCurrent);  
-    
+    //console.log('selected colour: ' + colCurrent);  
 }
 
 //GameLoop setup
