@@ -71,7 +71,7 @@ var renderIMG = document.getElementById('renderIMG');
 var rdctx = renderIMG.getContext("2d");
 renderIMG.width = gridX;
 renderIMG.height = gridY;
-var resize = 1;
+var resize = 16;
 var tempCanvas=document.createElement("canvas");
 var tctx=tempCanvas.getContext("2d");
 
@@ -117,6 +117,12 @@ function ReBuildSprite() {
     
 }
 
+function BlankSprite() {
+    rdctx.fillStyle = '#666666';
+    rdctx.fillRect( 0, 0, resize, resize );
+
+}
+
 function ReSetSprite() {
     //set back to 1-1 scale
     ResizeTo(renderIMG, 1/resize);
@@ -156,6 +162,9 @@ function ConvertCanvastoImageData() {
             // Dispay Blob content in an Image.
             const blob = new Blob([arrayBuffer], {type: mimeType});
             imageOut.src = URL.createObjectURL(blob);
+            //console.log("height: " + imageOut.style.height.value);
+            imageOut.style.height = '32px';
+            imageOut.style.width = '16px';
             //console.log(arrayBuffer);
 
             //var bufView = new Uint8Array(arrayBuffer);
@@ -163,6 +172,12 @@ function ConvertCanvastoImageData() {
             //output to webpage
             //textOutputBin.innerHTML = "[binary output]\n" + bufViewID;
 
+            
+            //reset arrays
+            colArr.length = 0;
+            colArr = [];
+            genArr.length = 0;
+            genArr = [];
             SliceData(bufViewID);
 
             //run export text gen 
@@ -174,8 +189,6 @@ function ConvertCanvastoImageData() {
         reader.readAsArrayBuffer(blob);
     }, mimeType);
     
-
-    
 }
 
 //run through arrayIN
@@ -185,23 +198,20 @@ function CheckCol(arrayIn, arrayGen, arrayCol) {
     var addCol = true;
     var it = 0; //iterator
     
-    // //quick check colours 
-    // arrayCol.length = 0;
-    // arrayCol = [];
-
     //Transcribe colour data
     //Remove alpha
     //Detect colours
     for(var i=0; i<arrayIn.length; i++) {
         //for every new R-G-B, check colour 
         if(it == 0) {     
-            if(arrayIn[i] >= 0) { //first element 
+            if(arrayIn[i] >= 0) { //just check for number 0-inf 
                 var rgb = arrayIn[i] + ',' + arrayIn[i+1] + ',' + arrayIn[i+2];
                 var a = arrayIn[i+3]; //alpha 
             
                 console.log("rgb: " + rgb + " a: " + a);
 
-                if(a != 0) { //alpha skip (empty cell)
+                if(a != 0) {    //alpha > 0     (yes colour)
+                    //alpha skip (empty cell)
                     //add first colour 
                     if(arrayCol.length == 0) {
                         arrayCol[arrayCol.length] = rgb;
@@ -221,36 +231,35 @@ function CheckCol(arrayIn, arrayGen, arrayCol) {
                 
                         addCol = true;
                     }
+
+                    //change to given register value
+                    //raw pixel value
+                    if(arrayIn[i] >= 0) { 
+                        arrayGen[arrayGen.length] = 1;
+                    }
+
+                } else {        //alpha = 0  (no colour)
+
+                    //handle no colour
+                    if(arrayIn[i] == 0) { 
+                        arrayGen[arrayGen.length] = 0;
+                    }
+
                 }
             }
         }
 
-        //get colour - check against colour register array
-        
-        //set colour in array if new
-        
-        //change to given register value
-        //handle colour value
-        if((arrayIn[i] != 0) && (it <=3)) { 
-            arrayGen[i] = 1;
-        }
-        //handle no colour
-        if(arrayIn[i] == 0) { 
-            arrayGen[i] = 0;
-            //myArr[i] = '';   //undefined
-        }
-    
+        //skip to next RGB
         if(it >= 3) {
-            arrayGen.splice(i, 1); //remove alpha value
+            //arrayGen.splice(i, 1); //remove alpha value
             it = 0; //reset
         } else {
-            it++    //increment
+            it++; //increment
         }
     
     }
 
     //console.log("FINISHED processing colour array, number of colours: " + arrayCol.length);
-
 }
 
 //operate on image data
@@ -280,7 +289,6 @@ function SliceData(da) {
             }
             it++;
 
-            i+=2;
         } 
         
         if(it == 8) {
@@ -289,11 +297,19 @@ function SliceData(da) {
 
             bytes[bytes.length] = BIstr;
             BIstr = '';
+        } else { //at the end without a full byte
+            if(i == genArr.length-1) { //save anyway
+                //expand to full byte
+
+                console.log("byte generated: " + BIstr);
+                bytes[bytes.length] = BIstr;
+                BIstr = '';
+            }
         }
     }
 
     //console.log(myArr);
-    //console.log(genArr);
+    console.log(genArr);
     
     //Convert to unicode
     // var b = parseInt( bytes[0], 2 );
@@ -409,7 +425,15 @@ butBlu.onload = () => {
         onDown() {
             this.image = butBlu
             this.y +=5;
+
+            //set back to 1-1 scale 
+            ResizeTo(renderIMG, 1/resize);
+            //process data and export
             ConvertCanvastoImageData();
+            //clear, rescale, rebuild
+            BlankSprite();
+            ResizeTo(renderIMG, resize);
+            ReBuildSprite();
         },
         onUp() {
             this.image = butGry
@@ -674,7 +698,7 @@ function CleanUpGrid() {
 function RecalcByteEstimate() {
 
     let area = gridX * gridY;
-    let byteNum = area/4; //8 bits in a byte
+    let byteNum = Math.ceil(area/4); //8 bits in a byte
     let gridString = gridX.toString() + "," + gridY.toString();
     //console.log("Grid string " + gridString + " - " + gridString.length);
 
