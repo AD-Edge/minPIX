@@ -18,7 +18,6 @@ var textOutputByte = document.getElementById("exportText2_byt");
 var textOutputBin = document.getElementById("exportText_bin");
 var textOutputCmp = document.getElementById("exportText_cmp");
 
-
 //colour detection
 var colSelect = document.getElementById('colourSelect')
 var colCurrent = null; 
@@ -63,7 +62,6 @@ let Area1Col = null;
 
 var sideUIX = canvas.width/4;
 
-
 //experimental image gen
 const testImg = new Image();
 //canvas for rendering
@@ -88,9 +86,71 @@ var genArr = [];
 
 //set background
 renderIMG.setAttribute('style', 'background-color:#666666')
-
 //initial setting of render image canvas
 ResizeTo(renderIMG, resize);
+
+var testData = "3,5,56,7D"; //sprite data test
+DecompileSprite(testData);
+
+function DecompileSprite(data) {
+    console.log("Decompiling and rendering: " + data);
+    const spitData = data.split(",");
+
+    //1 bit for now
+    context.fillStyle = 'black';  
+    
+    //get dimensions 
+    var w = splitData[0];
+    var h = splitData[1];
+    
+    for(var i=2; i< splitData.length; i++) {
+        var hex = ''; //starting at [4]
+        //each hex, turn into binary (array)
+
+    }
+
+    //build sprite from binary (basically format of previous stuff)
+    var currX = 0;
+    for (var i = 0; i < needed.length; i++) {
+        var letter = needed[i];
+        var addX = 0;
+        var currY = 0;
+
+        for (var y = 0; y < letter.length; y++) {
+            var row = letter[y];
+            //console.log("Drawing row: " + row);
+            for (var x = 0; x < row.length; x++) {
+                if (row[x]) {
+                    context.fillRect(currX + x * size, currY, size, size);
+                }
+            }
+            addX = Math.max(addX, row.length * size);
+            currY += size;
+        }
+        currX += size + addX;
+    }
+    //console.log('Drew ' + string + ' at size ' + size);
+}
+
+//test data reconstruct 
+let testObj = GameObject({
+    x: 8,
+    y: 324,
+    width: 200,
+    height: 30,
+   
+    render: function() {
+      // draw the game object normally (perform rotation and other transforms)
+      this.draw();      
+      // outline the game object
+      this.context.strokeStyle = 'red';
+      this.context.lineWidth = 1;
+      this.context.strokeRect(0, 0, this.width, this.height);
+
+      DrawText(4, this.x, this.y);
+    }
+});
+
 
 function DrawRenderPixel(col, x, y) {
     rdctx.fillStyle = col;
@@ -826,6 +886,10 @@ const loop = GameLoop({
             Area1.render();
         }
         SideUI.render();
+
+        if(textObj) {
+            textObj.render();
+        }
     },
 });
 
