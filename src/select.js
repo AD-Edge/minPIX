@@ -1,5 +1,32 @@
-
 var colSelect = document.getElementById("colourSelect");
+var colorTxt = document.getElementById("color");
+
+var val = null;
+
+//Disable multi colours
+function DisableArea2() {
+    // This will disable all the children of the div
+    var nodes = document.getElementById("area2").getElementsByTagName('*');
+    for(var i = 0; i < nodes.length; i++){
+        nodes[i].disabled = true;
+    }
+
+    $('#area2').fadeTo('slow',.2);
+
+    ClickSelect(1);
+    document.getElementById('radio1').checked = true;
+
+}
+function EnableArea2() {
+    // This will disable all the children of the div
+    var nodes = document.getElementById("area2").getElementsByTagName('*');
+    for(var i = 0; i < nodes.length; i++){
+        nodes[i].disabled = false;
+    }
+
+    $('#area2').fadeTo('slow', 1);
+}
+
 
 function UpdateColour(num) {
     console.log('colour updated: ' + num);
@@ -8,74 +35,70 @@ function UpdateColour(num) {
     return false;
 }   
 
+function SetColourText(x) {
+    if(x == null) {
+        colorTxt.innerHTML = "TRANSPARENT";
+    } else {
+        colorTxt.innerHTML = x.toString().toUpperCase();
+    }
+}
+
 function ClickSelect(num) {
 
     if(num == 0) {
-        var val = document.getElementById("html5colorpicker0").value;
-        console.log("Colour of new selected: " + val);
+        //var val = document.getElementById("html5colorpicker0").value;
+        val = null;
+        SetColourText(val);
+        console.log("Colour of new selected: trasparent");
     } 
     else if (num == 1) {
-        var val = document.getElementById("html5colorpicker1").value;
+        val = document.getElementById("html5colorpicker1").value;
+        SetColourText(val);
         console.log("Colour of new selected: " + val);
     } 
     else if (num == 2) {
-        var val = document.getElementById("html5colorpicker2").value;
+        val = document.getElementById("html5colorpicker2").value;
+        SetColourText(val);
         console.log("Colour of new selected: " + val);
     }
     else if (num == 3) {
-        var val = document.getElementById("html5colorpicker3").value;
+        val = document.getElementById("html5colorpicker3").value;
+        SetColourText(val);
         console.log("Colour of new selected: " + val);
     }
     else if (num == 4) {
-        var val = document.getElementById("html5colorpicker4").value;
+        val = document.getElementById("html5colorpicker4").value;
+        SetColourText(val);
         console.log("Colour of new selected: " + val);
     }
     else if (num == 5) {
-        var val = document.getElementById("html5colorpicker5").value;
+        val = document.getElementById("html5colorpicker5").value;
+        SetColourText(val);
         console.log("Colour of new selected: " + val);
     }
     else if (num == 6) {
-        var val = document.getElementById("html5colorpicker6").value;
+        val = document.getElementById("html5colorpicker6").value;
+        SetColourText(val);
         console.log("Colour of new selected: " + val);
     }
     else if (num == 7) {
-        var val = document.getElementById("html5colorpicker7").value;
-        console.log("Colour of new selected: " + val);
-    }
-    else if (num == 8) {
-        var val = document.getElementById("html5colorpicker8").value;
-        console.log("Colour of new selected: " + val);
-    }
-    else if (num == 9) {
-        var val = document.getElementById("html5colorpicker9").value;
-        console.log("Colour of new selected: " + val);
-    }
-    else if (num == 'A') {
-        var val = document.getElementById("html5colorpickerA").value;
-        console.log("Colour of new selected: " + val);
-    }
-    else if (num == 'B') {
-        var val = document.getElementById("html5colorpickerB").value;
-        console.log("Colour of new selected: " + val);
-    }
-    else if (num == 'C') {
-        var val = document.getElementById("html5colorpickerC").value;
-        console.log("Colour of new selected: " + val);
-    }
-    else if (num == 'D') {
-        var val = document.getElementById("html5colorpickerD").value;
-        console.log("Colour of new selected: " + val);
-    }
-    else if (num == 'E') {
-        var val = document.getElementById("html5colorpickerE").value;
-        console.log("Colour of new selected: " + val);
-    }
-    else if (num == 'F') {
-        var val = document.getElementById("html5colorpickerF").value;
+        val = document.getElementById("html5colorpicker7").value;
+        SetColourText(val);
         console.log("Colour of new selected: " + val);
     }
 
+
     if(val != null) {
+        //set colour background
         colSelect.style.backgroundColor = val;
+
+        //recolour text if black //could do for any dark colours also
+        if(val == "#000000") {
+            colorTxt.style.color = '#FFFFFF'
+            colSelect.style.color = '#FFFFFF'
+        } else {
+            colorTxt.style.color = '#000000'
+            colSelect.style.color = '#000000'
+        }
     }
 }

@@ -17,7 +17,7 @@ table.bottomBorder2 {
     border-collapse: collapse; 
     padding: 10px; 
     text-align: left;
-    border: 2px solid black; 
+    border: 3px solid black; 
 }
 
 table.bottomBorder2 td, 
@@ -114,4 +114,8 @@ h3 {
   margin-inline-start: 0px;
   margin-inline-end: 0px;
   font-weight: bold;
+}
+
+tr.disabled{
+  pointer-events: none;
 }

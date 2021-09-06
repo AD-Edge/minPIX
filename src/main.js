@@ -1,5 +1,5 @@
 
-const { init, GameLoop, Text, load, setImagePath, Sprite, 
+const { init, GameLoop, GameObject, Text, load, setImagePath, Sprite, 
     initPointer, imageAssets, track, pointer, Button} = kontra;
 
 //get components from index
@@ -21,6 +21,7 @@ var textOutputCmp = document.getElementById("exportText_cmp");
 //colour detection
 var colSelect = document.getElementById('colourSelect')
 var colCurrent = null; 
+var colIndex = []; // current index
 
 //Grid Calcs / variables
 var gridX = 4; //number of grid spaces, from 2 - 32
@@ -54,7 +55,7 @@ let buttonY = null;
 
 var tX = null;
 
-var widthUIX = 60;
+var widthUIX = 55;
 var heightUIX = 130;
 
 let Area1 = null;
@@ -80,7 +81,7 @@ const bufferByteLen = document.querySelector('#arraybuffer-byte-length');
 const mimeType = 'image/png';
 const imageOut = document.querySelector('#image-out');
 
-var hexArr = [];
+var charsArr = [];
 var colArr = [];
 var genArr = [];
 
@@ -90,7 +91,7 @@ renderIMG.setAttribute('style', 'background-color:#666666')
 ResizeTo(renderIMG, resize);
 
 var testData = "3,5,56,7D"; //sprite data test
-DecompileSprite(testData);
+//DecompileSprite(testData);
 
 function DecompileSprite(data) {
     console.log("Decompiling and rendering: " + data);
@@ -100,8 +101,8 @@ function DecompileSprite(data) {
     context.fillStyle = 'black';  
     
     //get dimensions 
-    var w = splitData[0];
-    var h = splitData[1];
+    //var w = splitData[0];
+    //var h = splitData[1];
     
     for(var i=2; i< splitData.length; i++) {
         var hex = ''; //starting at [4]
@@ -178,9 +179,7 @@ function ReBuildSprite() {
 }
 
 function BlankSprite() {
-    rdctx.fillStyle = '#666666';
-    rdctx.fillRect( 0, 0, resize, resize );
-
+    rdctx.clearRect(0, 0, renderIMG.width, renderIMG.height);
 }
 
 function ReSetSprite() {
@@ -223,8 +222,8 @@ function ConvertCanvastoImageData() {
             const blob = new Blob([arrayBuffer], {type: mimeType});
             imageOut.src = URL.createObjectURL(blob);
             //console.log("height: " + imageOut.style.height.value);
-            imageOut.style.height = '32px';
-            imageOut.style.width = '16px';
+            imageOut.style.width = '32px';
+            imageOut.style.height = '40px';
             //console.log(arrayBuffer);
 
             //var bufView = new Uint8Array(arrayBuffer);
@@ -232,12 +231,6 @@ function ConvertCanvastoImageData() {
             //output to webpage
             //textOutputBin.innerHTML = "[binary output]\n" + bufViewID;
 
-            
-            //reset arrays
-            colArr.length = 0;
-            colArr = [];
-            genArr.length = 0;
-            genArr = [];
             SliceData(bufViewID);
 
             //run export text gen 
@@ -268,14 +261,19 @@ function CheckCol(arrayIn, arrayGen, arrayCol) {
                 var rgb = arrayIn[i] + ',' + arrayIn[i+1] + ',' + arrayIn[i+2];
                 var a = arrayIn[i+3]; //alpha 
             
-                console.log("rgb: " + rgb + " a: " + a);
+                //console.log("rgb: " + rgb + " a: " + a);
+                var rgbHEX = rgbToHex(rgb);
+                //cheap/quick cut down, omits rounding
+                var rgbHEXm = rgbHEX.charAt(1) + rgbHEX.charAt(3) + rgbHEX.charAt(5);
+                //console.log(rgbHEX); 
+                //console.log(rgbHEXm); 
 
                 if(a != 0) {    //alpha > 0     (yes colour)
                     //alpha skip (empty cell)
                     //add first colour 
                     if(arrayCol.length == 0) {
                         arrayCol[arrayCol.length] = rgb;
-                        console.log("new colour detected: " + rgb);  
+                        console.log("first new colour detected: " + rgb); 
                     } else {
                         //check if new colour is a previous colour?
                         for(var j=0; j<arrayCol.length; j++) {
@@ -295,14 +293,18 @@ function CheckCol(arrayIn, arrayGen, arrayCol) {
                     //change to given register value
                     //raw pixel value
                     if(arrayIn[i] >= 0) { 
-                        arrayGen[arrayGen.length] = 1;
+                        //get the colour index of the pixel
+                        arrayGen[arrayGen.length] = rgbHEXm;
+
+                        //arrayGen[arrayGen.length] = 1; previous binary version
                     }
 
                 } else {        //alpha = 0  (no colour)
 
                     //handle no colour
                     if(arrayIn[i] == 0) { 
-                        arrayGen[arrayGen.length] = 0;
+                        arrayGen[arrayGen.length] = '';
+                        
                     }
 
                 }
@@ -322,51 +324,83 @@ function CheckCol(arrayIn, arrayGen, arrayCol) {
     //console.log("FINISHED processing colour array, number of colours: " + arrayCol.length);
 }
 
-//operate on image data
+function GetColorIndex(cIn) {
+    for (var i=0; i<colIndex.length; i++) {
+        if(colIndex[i] == cIn) {
+            console.log("Colour index of input " + cIn + " is: " + i);
+            return i; //return index
+        } else {
+            return -1;
+        }
+    }
+}
+//Operate on image data
+//Build final output hex array
 function SliceData(da) {
     const myArr = da.toString().split(",");
     var it = 0; //iterator
 
-    //reset hex array
-    hexArr.length = 0;
-    hexArr = [];
+    //reset arrays
+    charsArr.length = 0;
+    charsArr = [];    
+    colArr.length = 0;
+    colArr = [];
+    genArr.length = 0;
+    genArr = [];
     
     CheckCol(myArr, genArr, colArr);
     console.log("number of colours detected: " + colArr.length);
 
-    var BIstr = '';
-    var bytes = [];
-    //Convert generated array to binary, remove RGB
-    for(var i=0; i<genArr.length; i++) {
-        
-        if(it <= 8) {
-            if(genArr[i] == 1) {
-                BIstr += genArr[i].toString();
-            } else if(genArr[i] == 0) {
-                BIstr += '0';
-            } else {
-                it--;
-            }
-            it++;
+    //final byte string for 2x pixels combined
+    var pxASCII = '';
 
-        } 
-        
-        if(it == 8) {
-            console.log("byte generated: " + BIstr);
-            it = 0;
+    console.log("testing this: 66: " + String.fromCharCode(0b1000000 + '77' << 3));
 
-            bytes[bytes.length] = BIstr;
-            BIstr = '';
-        } else { //at the end without a full byte
-            if(i == genArr.length-1) { //save anyway
-                //expand to full byte
+    //iterate through array, 2 pixels at a time
+    for(var i=0; i<genArr.length; i+=2) {
+        pxASCII += String.fromCharCode(0b1000000 + 
+            (genArr[i] || 0) + ((genArr[i+1] || 0) << 3));
+        //charsArr[charsArr.length] = pxASCII;
 
-                console.log("byte generated: " + BIstr);
-                bytes[bytes.length] = BIstr;
-                BIstr = '';
-            }
-        }
+        console.log("adding together " + genArr[i] + " & " + genArr[i+1]);
     }
+        
+    console.log(pxASCII);
+    // //old binary compress method
+    //var bytes = [];
+    // var BIstr = '';
+    // //Convert generated array to binary, remove RGB
+    // for(var i=0; i<genArr.length; i++) {
+    //     if(it <= 8) {
+    //         if(genArr[i] == 1) {
+    //             BIstr += genArr[i].toString();
+    //         } else if(genArr[i] == 0) {
+    //             BIstr += '0';
+    //         } else {
+    //             it--;
+    //         }
+    //         it++;
+    //     } 
+    //     if(it == 8) {
+    //         console.log("byte generated: " + BIstr);
+    //         it = 0;
+    //         bytes[bytes.length] = BIstr;
+    //         BIstr = '';
+    //     } else { //at the end without a full byte
+    //         if(i == genArr.length-1) { //save anyway
+    //             //expand to full byte
+    //             console.log("byte generated: " + BIstr);
+    //             bytes[bytes.length] = BIstr;
+    //             BIstr = '';
+    //         }
+    //     }
+    // }
+    //convert byte array values into hex
+    // for(var i=0; i<bytes.length; i++) {
+    //     var hexa = parseInt(bytes[i], 2).toString(16).toUpperCase();
+    //     console.log("HEX: " + hexa);
+    //     charsArr[charsArr.length] = hexa;
+    // }
 
     //console.log(myArr);
     console.log(genArr);
@@ -380,19 +414,12 @@ function SliceData(da) {
     //console.log(String.fromCharCode(b));
     //console.log(String.fromCharCode(c));
     
-    //Build hex array
-    for(var i=0; i<bytes.length; i++) {
-        var hexa = parseInt(bytes[i], 2).toString(16).toUpperCase();
-        console.log("HEX: " + hexa);
-        hexArr[hexArr.length] = hexa;
-    }
-
     //output to webpage
     var bufViewID = new Uint8Array(myArr.data);
-    console.log("Bytes Estimated: " + bytes.length);
+    console.log("Bytes Estimated: " + charsArr.length);
     //console.log("estimated bytes: " + genArr.length);
-    textOutputBin.innerHTML = "[Binary Output]\n" + genArr;
-    textOutputCmp.innerHTML = "[Compressed Output]\n" + hexArr;
+    textOutputBin.innerHTML = "[Pixel Data Output]\n" + genArr;
+    textOutputCmp.innerHTML = "[Compressed Data Output]\n" + pxASCII;
 }
 
 
@@ -606,6 +633,94 @@ butBlu.onload = () => {
         }
     });
 
+    const OneBit = Button({
+        type: '0',
+        x: 10,
+        y: 100,
+        color: '#999999',
+        width: 64,
+        height: 32,
+
+        // text properties
+        text: {
+            text: '1BIT',
+            color: 'black',
+            font: '20px Arial, sans-serif',
+            anchor: {x: -0.25, y: -0.35}
+        },
+        onDown() {
+            this.color = '#FFFFFF';
+            MultiCol.color = '#999999';
+            MultiCol.type = '0';
+            this.type = 1;
+
+            DisableArea2();
+        },
+        onUp() {
+            //this.color = 'grey'
+            //this.y -=2;
+        },
+        onOver() {
+            if(this.type == 0) {
+                this.color = '#AAAAAA'
+            }
+        },
+        onOut: function() {
+            if(this.type == 0) {
+                //this.color = 'rgb(153,153,153)';
+                this.color = '#999999'
+            } else {
+                this.color = '#FFFFFF'
+            }
+        }
+    });
+    const MultiCol = Button({
+        type: '1',
+        x: 85,
+        y: 100,
+        color: '#FFFFFF',
+        width: 64,
+        height: 32,
+
+        // text properties
+        text: {
+            text: 'MULTI',
+            color: 'black',
+            font: '20px Arial, sans-serif',
+            anchor: {x: -0.05, y: -0.35}
+        },
+        onDown() {
+            this.color = '#FFFFFF';
+            OneBit.color = '#999999';
+            OneBit.type = '0';
+            this.type = 1;
+            
+            EnableArea2();
+        },
+        onUp() {
+            //this.color = 'grey'
+            //this.y -=2;
+        },
+        onOver() {
+            if(this.type == 0) {
+                this.color = '#AAAAAA'
+            }
+        },
+        onOut: function() {
+            if(this.type == 0) {
+                //this.color = 'rgb(153,153,153)';
+                this.color = '#999999'
+            } else {
+                this.color = '#FFFFFF'
+            }
+        }
+    });
+
+    track(OneBit);
+    SideUI.addChild(OneBit);
+    track(MultiCol);
+    SideUI.addChild(MultiCol);
+
     SideUI.addChild(buttonSet);
     SideUI.addChild(buttonWPlus);
     SideUI.addChild(buttonWSub);
@@ -636,7 +751,7 @@ function GenerateExportText() {
     + '////////////////Copy the below data segment////////////////' + '\n'
     + '\n'
 
-    + gridX + ',' + gridY + ',' + hexArr
+    + gridX + ',' + gridY + ',' + charsArr
 
 
     + '\n \n'
@@ -644,10 +759,10 @@ function GenerateExportText() {
 }
         
 //Height x Width section
-createBox(32, 32, SideUI, 45, 4);
-createBox(32, 32, SideUI, 115, 4);
-createText(SideUI, 60, 20, gridX);
-createText(SideUI, 130, 20, gridY);
+createBox(32, 32, SideUI, widthUIX-16, heightUIX - 126);
+createBox(32, 32, SideUI, widthUIX + 60, heightUIX - 126);
+createText(SideUI, widthUIX - 4 , heightUIX - 110, gridX);
+createText(SideUI, widthUIX + 72, heightUIX - 110, gridY);
 
 function createText(par, xLoc, yLoc, i) {
         const tex = Text({
@@ -656,7 +771,7 @@ function createText(par, xLoc, yLoc, i) {
             color: 'black',
             x: xLoc,
             y: yLoc,
-            anchor: {x: 0.5, y:0.5},
+            anchor: {x: 0.0, y:0.5},
             textAlign: 'center'
         });
 
@@ -735,8 +850,17 @@ function componentToHex(comp) {
 
 }
 
-function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+function rgbToHex(rgb) {
+    var a = rgb.split(",");
+    
+    var b = a.map(function(x){                      //For each array element
+        x = parseInt(x).toString(16);      //Convert to a base16 string
+        return (x.length==1) ? "0"+x : x; //Add zero if we get only one character
+    });
+    //b = "0x"+b.join("");
+    b = "#"+b.join("");
+        
+    return b;
 }
 
 
@@ -766,7 +890,7 @@ function RecalcByteEstimate() {
     byteNum += colArr.length; //colour register (!No accurate)
     byteNum += gridString.length; //size values
 
-    textOutputByte.value = '(WIP) Estimated: \n~' + byteNum + ' bytes\n'
+    textOutputByte.value = '[Estimated] \n~' + byteNum + ' bytes\n'
 
 }
 
@@ -887,9 +1011,9 @@ const loop = GameLoop({
         }
         SideUI.render();
 
-        if(textObj) {
-            textObj.render();
-        }
+        // if(textObj) {
+        //     textObj.render();
+        // }
     },
 });
 
