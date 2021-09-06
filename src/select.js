@@ -15,7 +15,6 @@ function DisableArea2() {
 
     ClickSelect(1);
     document.getElementById('radio1').checked = true;
-
 }
 function EnableArea2() {
     // This will disable all the children of the div
@@ -23,7 +22,7 @@ function EnableArea2() {
     for(var i = 0; i < nodes.length; i++){
         nodes[i].disabled = false;
     }
-
+    
     $('#area2').fadeTo('slow', 1);
 }
 
