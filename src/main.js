@@ -41,7 +41,6 @@ let cells = [];
 //set to true to initialize
 var redraw = true;
 
-
 //UI variables 
 let buttonSet = null;
 let buttonX = null;
@@ -57,9 +56,12 @@ var tX = null;
 let Area1 = null;
 let Area1Col = null;
 
-
 //experimental image gen
+var imageArray = []; //save all images here
 const testImg = new Image();
+var cmpIMG = document.getElementById('compileIMG');
+var cmctx = cmpIMG.getContext("2d");
+
 //canvas for rendering
 var renderIMG = document.getElementById('renderIMG');
 var rdctx = renderIMG.getContext("2d");
@@ -86,34 +88,64 @@ renderIMG.setAttribute('style', 'background-color:#666666')
 //initial setting of render image canvas
 ResizeTo(renderIMG, resize);
 
-var testData = "3,5,56,7D"; //sprite data test
-//DecompileSprite(testData);
+var testData = "3,5,56,FA"; //sprite data test
+//DecompileDrawSprite(testData, 0, 0, 20);
 
-function DecompileDrawSprite(data) {
+//test function, build all letter sprites
+function ProcessTestLetters() {
+    console.log("Letters to generate: " + testLetters.length);
+    for(var i=0; i< testLetters.length; i++) {
+        
+        
+    }
+    console.log("Letters actually generated: " + imageArray.length);
+}
+
+function DecompileDrawSprite(data, x, y, size) {
     console.log("Decompiling and rendering: " + data);
     var splitData = data.split(",");
 
     //1 bit for now
-    context.fillStyle = 'black';  
+    context.fillStyle = 'black';
     
     //get dimensions 
     var w = splitData[0];
     var h = splitData[1];
-    
+
+    var bin = [];
+    var rows = [];
+    var br ='';
+    //convert each hex element into binary
     for(var i=2; i< splitData.length; i++) {
-        var hex = ''; //starting at [4]
-        //each hex, turn into binary (array)
+        var hex = hexToBinary(splitData[i]);
+        bin[bin.length] = hex;
+        //console.log("Hex to Binary: " + hex);
     }
 
-    //build sprite from binary (basically format of previous stuff)
+    //convert each binary number into rows
+    for(var j=0; j < bin.length; j++) { //loop all binary strings
+        var bstr = bin[j];
+        for(var k=0; k<bstr.length; k++) { //loop binary string
+            br += bstr.charAt(k);
+            //slice n dice
+            if(br.length == w) {
+                //console.log("Binary section: " + br);
+                rows.push(br);
+                br = '' //reset
+            }
+        }
+    }
+    
+    //build sprite from binary (~format of previous stuff)
     var currX = 0;
-    for (var i = 0; i < needed.length; i++) {
-        var letter = needed[i];
+    //loop through all pixel row strings
+    //needed = [1,0,1][1,1,1]... (previous setup)
+    for (var i = 0; i < bin.length; i++) { //each row element
+        var pixels = bin[i]; //
         var addX = 0;
         var currY = 0;
-
-        for (var y = 0; y < letter.length; y++) {
-            var row = letter[y];
+        for (var y = 0; y < pixels.length; y++) {
+            var row = pixels.charAt(y);
             //console.log("Drawing row: " + row);
             for (var x = 0; x < row.length; x++) {
                 if (row[x]) {
@@ -129,21 +161,19 @@ function DecompileDrawSprite(data) {
 }
 
 //test data reconstruct object
-let testObj = GameObject({
-    x: 8,
-    y: 324,
-    width: 200,
-    height: 30,
-   
+let testObj = Sprite({
+    x: 400,
+    y: 10,
+    width: 64,
+    height: 64,
+    image: testImg,
+
     render: function() {
-      // draw the game object normally (perform rotation and other transforms)
-      this.draw();      
-      // outline the game object
+      this.draw();
       this.context.strokeStyle = 'red';
       this.context.lineWidth = 1;
       this.context.strokeRect(0, 0, this.width, this.height);
-
-      (4, this.x, this.y);
+      //DecompileDrawSprite(testData, this.x, this.y, 10);
     }
 });
 
@@ -402,6 +432,9 @@ function ProcessOneBitData() {
         } else { //at the end without a full byte
             if(i == genArr.length-1) { //save anyway
                 //expand to full byte
+                for(var j=BIstr.length; j<8; j++) { 
+                    BIstr += '0';//add zeros (waste)
+                }
                 console.log("byte generated: " + BIstr);
                 bytes[bytes.length] = BIstr;
                 BIstr = '';
@@ -709,6 +742,10 @@ const loop = GameLoop({
         renderQueue.ui.forEach(element => {
             element.obj.render();
         });
+
+        if(testObj) {
+            testObj.render();
+        }
 
     },
 });
