@@ -492,7 +492,6 @@ function GenerateExportText() {
     textOutput.value = '[Generated Export Data]' + '\n'
     + 'Sprite dimensions: ' + gridX + "x" + gridY + "\nColours: " + colArr.length + '\n'
     + colString
-    + '\n' + '\n'
 
     + '////////////////Copy the below data segment////////////////' + '\n'
     + '\n'
