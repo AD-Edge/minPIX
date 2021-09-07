@@ -59,15 +59,15 @@ let Area1Col = null;
 //experimental image gen
 var imageArray = []; //save all images here
 const testImg = new Image();
-var cmpIMG = document.getElementById('compileIMG');
-var cmctx = cmpIMG.getContext("2d");
+//var cmpIMG = document.getElementById('compileIMG');
+//var cmctx = cmpIMG.getContext("2d");
 
 //canvas for rendering
 var renderIMG = document.getElementById('renderIMG');
 var rdctx = renderIMG.getContext("2d");
 renderIMG.width = gridX;
 renderIMG.height = gridY;
-var resize = 16;
+var resize = 2;
 var tempCanvas=document.createElement("canvas");
 var tctx=tempCanvas.getContext("2d");
 
@@ -89,18 +89,55 @@ renderIMG.setAttribute('style', 'background-color:#666666')
 ResizeTo(renderIMG, resize);
 
 var testData = "3,5,56,FA"; //sprite data test
-//DecompileDrawSprite(testData, 0, 0, 20);
+//DecompileDrawSprite(testData, 0, 0, 5);
+
+//ProcessTestLetters();
 
 //test function, build all letter sprites
 function ProcessTestLetters() {
     console.log("Letters to generate: " + testLetters.length);
     for(var i=0; i< testLetters.length; i++) {
-        
-        
+        var img = new Image();
+
+        //get first string
+        var pstr = testLetters[i];
+
+        //decompile
+        //render to canvas
+        DecompileDrawSprite(pstr, 0, 0, 5);        
+
+        //snapshot canvas
+
+        //create array buffer
+        //arrayBuffer = 
+
+        //const blob = new Blob([arrayBuffer], {type: mimeType});
+        //img.src = URL.createObjectURL(blob);
+
+        imageArray.push(img);
     }
     console.log("Letters actually generated: " + imageArray.length);
 }
 
+// //test data reconstruct object
+// let testObj = Sprite({
+//     x: 400,
+//     y: 10,
+//     width: 64,
+//     height: 64,
+//     image: testImg,
+
+//     render: function() {
+//       this.draw();
+//       this.context.strokeStyle = 'red';
+//       this.context.lineWidth = 1;
+//       this.context.strokeRect(0, 0, this.width, this.height);
+//       //DecompileDrawSprite(testData, this.x, this.y, 10);
+//     }
+// });
+
+//Decompiles sprite data (HEX compress)
+//renders in compile canvas
 function DecompileDrawSprite(data, x, y, size) {
     console.log("Decompiling and rendering: " + data);
     var splitData = data.split(",");
@@ -129,53 +166,45 @@ function DecompileDrawSprite(data, x, y, size) {
             br += bstr.charAt(k);
             //slice n dice
             if(br.length == w) {
-                //console.log("Binary section: " + br);
+                //console.log("Binary section added to rows: " + br);
                 rows.push(br);
                 br = '' //reset
             }
         }
     }
     
+    //reset canvas and draw
+    cmpIMG.width = w * size;
+    cmpIMG.height = h * size;
+    DrawBinaryToCavas(cmctx, size, rows, w);
+
+}
+
+function DrawBinaryToCavas(ctx, size, rows, width) {
     //build sprite from binary (~format of previous stuff)
+    context.fillStyle = 'black';
     var currX = 0;
     //loop through all pixel row strings
     //needed = [1,0,1][1,1,1]... (previous setup)
-    for (var i = 0; i < bin.length; i++) { //each row element
-        var pixels = bin[i]; //
-        var addX = 0;
+    for (var i = 0; i < rows.length; i++) { //each row element
+        var pixels = rows[i]; //
         var currY = 0;
+        //console.log("pixels: " + pixels);
         for (var y = 0; y < pixels.length; y++) {
-            var row = pixels.charAt(y);
+            var row = pixels[y];
             //console.log("Drawing row: " + row);
             for (var x = 0; x < row.length; x++) {
-                if (row[x]) {
-                    context.fillRect(currX + x * size, currY, size, size);
+                if (row[x]==1) {
+                    //console.log("Drawing row[x]: " + row[x]);
+                    ctx.fillRect(currY + y * size, currX, size, size);
                 }
             }
-            addX = Math.max(addX, row.length * size);
-            currY += size;
         }
-        currX += size + addX;
+        currY += size;
+        currX += size;
     }
     //console.log('Drew ' + string + ' at size ' + size);
 }
-
-//test data reconstruct object
-let testObj = Sprite({
-    x: 400,
-    y: 10,
-    width: 64,
-    height: 64,
-    image: testImg,
-
-    render: function() {
-      this.draw();
-      this.context.strokeStyle = 'red';
-      this.context.lineWidth = 1;
-      this.context.strokeRect(0, 0, this.width, this.height);
-      //DecompileDrawSprite(testData, this.x, this.y, 10);
-    }
-});
 
 //Draw a pixel in the renderImage canvas 
 function DrawRenderPixel(col, x, y) {
@@ -232,13 +261,15 @@ function ResizeTo(canvas,pct){
 
 //First step in converting renderImage canvas to image data/compressed
 //calls CheckCol and SliceData
-function ConvertCanvastoImageData() {
-    imageData = rdctx.getImageData(0, 0, renderIMG.width, renderIMG.height);
+function ConvertCanvastoImageData(cnv) {
+    let cntxt = cnv.getContext("2d");
+
+    imageData = cntxt.getImageData(0, 0, cnv.width, cnv.height);
     imageDataByteLen.textContent = imageData.data.byteLength + ' bytes.';
     //console.log(imageData);
 
     // Convert canvas to Blob, then Blob to ArrayBuffer.
-    renderIMG.toBlob((blob) => {
+    cnv.toBlob((blob) => {
     const reader = new FileReader();
 
     reader.addEventListener('loadend', () => {
@@ -250,7 +281,7 @@ function ConvertCanvastoImageData() {
             //console.log("height: " + imageOut.style.height.value);
             imageOut.style.width = gridX*8 + 'px';
             imageOut.style.height = gridY*8 + 'px';
-            //console.log(arrayBuffer);
+            console.log(arrayBuffer);
 
             //var bufView = new Uint8Array(arrayBuffer);
             var bufViewID = new Uint8Array(imageData.data);
@@ -382,7 +413,7 @@ function SliceData(da) {
         ProcessOneBitData();
     }
     //console.log(myArr);
-    console.log(genArr);
+    //console.log(genArr);
     
     //Convert to unicode
     // var b = parseInt( bytes[0], 2 );
