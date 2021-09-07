@@ -89,16 +89,16 @@ ResizeTo(renderIMG, resize);
 var testData = "3,5,56,7D"; //sprite data test
 //DecompileSprite(testData);
 
-function DecompileSprite(data) {
+function DecompileDrawSprite(data) {
     console.log("Decompiling and rendering: " + data);
-    const spitData = data.split(",");
+    var splitData = data.split(",");
 
     //1 bit for now
     context.fillStyle = 'black';  
     
     //get dimensions 
-    //var w = splitData[0];
-    //var h = splitData[1];
+    var w = splitData[0];
+    var h = splitData[1];
     
     for(var i=2; i< splitData.length; i++) {
         var hex = ''; //starting at [4]
@@ -128,7 +128,7 @@ function DecompileSprite(data) {
     //console.log('Drew ' + string + ' at size ' + size);
 }
 
-//test data reconstruct 
+//test data reconstruct object
 let testObj = GameObject({
     x: 8,
     y: 324,
@@ -143,22 +143,22 @@ let testObj = GameObject({
       this.context.lineWidth = 1;
       this.context.strokeRect(0, 0, this.width, this.height);
 
-      DrawText(4, this.x, this.y);
+      (4, this.x, this.y);
     }
 });
 
-
+//Draw a pixel in the renderImage canvas 
 function DrawRenderPixel(col, x, y) {
     rdctx.fillStyle = col;
     rdctx.fillRect( (x/(gridPix/resize)), (y/(gridPix/resize)), resize, resize );
     //console.log(x + ", " + y);
 }
 
+//Refresh/rebuild the renderImage canvas sprite
 function ReBuildSprite() {
     //set back to 1-1 scale 
     //ResizeTo(renderIMG, 1/resize);
     //redraw pixels
-    
     for(let i = 0; i< cells.length; i++) {
         //get colour
         var gCol = cells[i].color;
@@ -167,18 +167,17 @@ function ReBuildSprite() {
             DrawRenderPixel(gCol, cells[i].x, cells[i].y);  
         }
     }
-
     //rescale
     //ResizeTo(renderIMG, resize);
-    
 }
 
+//clear renderImage canvas
 function BlankSprite() {
     rdctx.clearRect(0, 0, renderIMG.width, renderIMG.height);
 }
 
+//Set renderImage canvas back to 1-1 scale
 function ReSetSprite() {
-    //set back to 1-1 scale
     ResizeTo(renderIMG, 1/resize);
     //resize
     renderIMG.width = gridX;
@@ -201,6 +200,8 @@ function ResizeTo(canvas,pct){
     ctx.drawImage(tempCanvas,0,0,cw,ch,0,0,cw*pct,ch*pct);
 }
 
+//First step in converting renderImage canvas to image data/compressed
+//calls CheckCol and SliceData
 function ConvertCanvastoImageData() {
     imageData = rdctx.getImageData(0, 0, renderIMG.width, renderIMG.height);
     imageDataByteLen.textContent = imageData.data.byteLength + ' bytes.';
@@ -375,6 +376,7 @@ function SliceData(da) {
     }
 }
 
+//Process gathered image data, in One-Bit mode
 function ProcessOneBitData() {
     //old binary compress method
     var bytes = [];
@@ -414,6 +416,7 @@ function ProcessOneBitData() {
     }
 }
 
+//Process gathered image data, in Multi-Colour mode
 function ProcessMultiColourData() {
     //old binary compress method
     var bytes = [];
@@ -443,6 +446,7 @@ function ProcessMultiColourData() {
     
 }
 
+//Finds the register of a colour, if one of that colour exists
 function GetColorIndex(cIn) {
     //console.log("col reg: " + colIndex[1]);
     for (var i=0; i < colIndex.length; i++) {
@@ -456,6 +460,7 @@ function GetColorIndex(cIn) {
     return -1;
 }
 
+//Switch between 1bit & multicolour mode
 function ToggleColourMode(tog) {
     if(tog != multiMode) {
         multiMode = tog;
@@ -465,7 +470,7 @@ function ToggleColourMode(tog) {
     }
 }
 
-
+//Create text for the exporter field
 function GenerateExportText() {
     //debug
     //textGen.text = 'Generated (' + gridX + "," + gridY + ') data for current sprite';
@@ -502,6 +507,23 @@ function GenerateExportText() {
     + '////////////////          End Data         ////////////////';
 }
 
+//Calculate byte estimate for current pixel art
+function RecalcByteEstimate() {
+
+    let area = gridX * gridY;
+    let byteNum = Math.ceil(area/4); //8 bits in a byte
+    let gridString = gridX.toString() + "," + gridY.toString();
+    //console.log("Grid string " + gridString + " - " + gridString.length);
+
+    byteNum += (byteNum*1)-2; //commas 
+    byteNum += colArr.length; //colour register (!No accurate)
+    byteNum += gridString.length; //size values
+
+    textOutputByte.value = '[Estimated] \n~' + byteNum + ' bytes\n'
+
+}
+
+//Creates pixel-art grid to draw on
 function createGrid(xIn, yIn) {
         const gridSQR = Sprite({
             type: '0',
@@ -552,26 +574,7 @@ function createGrid(xIn, yIn) {
         Area1.addChild(gridSQR);
 }
 
-function componentToHex(comp) {
-    var hex = comp.toString(16); 
-
-    return hex.length == 1 ? "0" + hex : hex;
-
-}
-
-function rgbToHex(rgb) {
-    var a = rgb.split(",");
-    
-    var b = a.map(function(x){                      //For each array element
-        x = parseInt(x).toString(16);      //Convert to a base16 string
-        return (x.length==1) ? "0"+x : x; //Add zero if we get only one character
-    });
-    //b = "0x"+b.join("");
-    b = "#"+b.join("");
-        
-    return b;
-}
-
+//Removes all pixel-art grid data
 function CleanUpGrid() {
     if(cells.length > 0) {
         //cleanup grid
@@ -587,21 +590,7 @@ function CleanUpGrid() {
 
 }
 
-function RecalcByteEstimate() {
-
-    let area = gridX * gridY;
-    let byteNum = Math.ceil(area/4); //8 bits in a byte
-    let gridString = gridX.toString() + "," + gridY.toString();
-    //console.log("Grid string " + gridString + " - " + gridString.length);
-
-    byteNum += (byteNum*1)-2; //commas 
-    byteNum += colArr.length; //colour register (!No accurate)
-    byteNum += gridString.length; //size values
-
-    textOutputByte.value = '[Estimated] \n~' + byteNum + ' bytes\n'
-
-}
-
+//create pixel-art grid object
 function BuildPixelGrid() {
 
     //grid area container
@@ -641,6 +630,7 @@ function BuildPixelGrid() {
 
 }
 
+//Grid X or Y expand/shrink after button press
 function UpdateGridX(i, pos) {
     if(pos) {
         //increment value
@@ -687,6 +677,7 @@ function UpdateGridY(i, pos) {
     return;
 }
 
+//Get currently selected colour
 function GetColourValue() { 
     colCurrent = colSelect.style.backgroundColor;
     //console.log('selected colour: ' + colCurrent);  

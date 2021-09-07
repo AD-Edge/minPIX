@@ -42,6 +42,12 @@ function SetColourText(x) {
     }
 }
 
+function GetColourRegs() {
+    UpdateColourReg();
+    
+    return colIndexGrab; 
+}
+
 function UpdateColourReg() {
     colIndexGrab[0] = 'null';
     
@@ -72,12 +78,6 @@ function UpdateColourReg() {
                         + colIndexGrab[6].charAt(2) 
                             + colIndexGrab[6].charAt(3);
 
-}
-
-function GetColourRegs() {
-    UpdateColourReg();
-    
-    return colIndexGrab; 
 }
 
 function ClickSelect(num) {
