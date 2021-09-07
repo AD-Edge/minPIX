@@ -21,8 +21,8 @@ var textOutputCmp = document.getElementById("exportText_cmp");
 //colour detection
 var colSelect = document.getElementById('colourSelect')
 var colCurrent = null; 
-var colIndex = []; // current index
 var multiMode = true;
+var colIndex = [];
 
 //Grid Calcs / variables
 var gridX = 4; //number of grid spaces, from 2 - 32
@@ -41,9 +41,6 @@ let cells = [];
 //set to true to initialize
 var redraw = true;
 
-//Array for UI objs
-let uiObjs_01 = [];
-let uiTexts_01 = [];
 
 //UI variables 
 let buttonSet = null;
@@ -54,15 +51,12 @@ let buttonHPlus = null;
 let buttonHSub = null;
 let buttonY = null;
 
-var tX = null;
 
-var widthUIX = 55;
-var heightUIX = 130;
+var tX = null;
 
 let Area1 = null;
 let Area1Col = null;
 
-var sideUIX = canvas.width/4;
 
 //experimental image gen
 const testImg = new Image();
@@ -305,13 +299,15 @@ function CheckCol(arrayIn, arrayGen, arrayCol) {
                     }
 
                 } else {        //alpha = 0  (no colour)
-
                     //handle no colour
                     if(arrayIn[i] == 0) { 
-                        arrayGen[arrayGen.length] = '';
-                        
-                    }
+                        if(multiMode) {
+                            arrayGen[arrayGen.length] = '';
 
+                        } else {
+                            arrayGen[arrayGen.length] = 0;
+                        }
+                    }
                 }
             }
         }
@@ -329,22 +325,13 @@ function CheckCol(arrayIn, arrayGen, arrayCol) {
     //console.log("FINISHED processing colour array, number of colours: " + arrayCol.length);
 }
 
-function GetColorIndex(cIn) {
-    for (var i=0; i<colIndex.length; i++) {
-        if(colIndex[i] == cIn) {
-            console.log("Colour index of input " + cIn + " is: " + i);
-            return i; //return index
-        } else {
-            return -1;
-        }
-    }
-}
 //Operate on image data
 //Build final output hex array
 function SliceData(da) {
     const myArr = da.toString().split(",");
-    var it = 0; //iterator
-
+    
+    //var pxASCII = '';
+    
     //reset arrays
     charsArr.length = 0;
     charsArr = [];    
@@ -359,9 +346,9 @@ function SliceData(da) {
     console.log("number of colours detected: " + colArr.length);
 
     if(multiMode) {
-        ProcessOneBitData();
-    } else {
         ProcessMultiColourData();
+    } else {
+        ProcessOneBitData();
     }
     //console.log(myArr);
     console.log(genArr);
@@ -379,7 +366,7 @@ function SliceData(da) {
     var bufViewID = new Uint8Array(myArr.data);
     if(multiMode) {
         textOutputBin.innerHTML = "[Pixel Data Output]\n" + genArr;
-        textOutputCmp.innerHTML = "[Compressed Data Output]\n" + pxASCII;
+        textOutputCmp.innerHTML = "[Compressed Data Output]\n" + charsArr;
         
     } else {
         textOutputBin.innerHTML = "[Pixel Data Output]\n" + genArr;
@@ -392,6 +379,7 @@ function ProcessOneBitData() {
     //old binary compress method
     var bytes = [];
     var BIstr = '';
+    var it = 0; //iterator
     //Convert generated array to binary, remove RGB
     for(var i=0; i<genArr.length; i++) {
         if(it <= 8) {
@@ -427,56 +415,45 @@ function ProcessOneBitData() {
 }
 
 function ProcessMultiColourData() {
-
-    //final byte string for 2x pixels combined
-    var pxASCII = '';
-
     //old binary compress method
     var bytes = [];
     var BIstr = '';
-    //Convert generated array to binary, remove RGB
-    for(var i=0; i<genArr.length; i++) {
-        if(it <= 8) {
-            if(genArr[i] == 1) {
-                BIstr += genArr[i].toString();
-            } else if(genArr[i] == 0) {
-                BIstr += '0';
-            } else {
-                it--;
-            }
-            it++;
-        } 
-        if(it == 8) {
-            console.log("byte generated: " + BIstr);
-            it = 0;
-            bytes[bytes.length] = BIstr;
-            BIstr = '';
-        } else { //at the end without a full byte
-            if(i == genArr.length-1) { //save anyway
-                //expand to full byte
-                console.log("byte generated: " + BIstr);
-                bytes[bytes.length] = BIstr;
-                BIstr = '';
-            }
-        }
-    }
-    //convert byte array values into hex
-    for(var i=0; i<bytes.length; i++) {
-        var hexa = parseInt(bytes[i], 2).toString(16).toUpperCase();
-        console.log("HEX: " + hexa);
-        hexArr[hexArr.length] = hexa;
-    }
+    var it = 0; //iterator
 
+    //update colour registers
+    colIndex = GetColourRegs(); //refresh
+    
     //iterate through array, 2 pixels at a time
     for(var i=0; i<genArr.length; i+=2) {
-        pxASCII += String.fromCharCode(0b1000000 + 
-            (genArr[i] || 0) + ((genArr[i+1] || 0) << 3));
+        //pxASCII += String.fromCharCode(0b1000000 + 
+            //(genArr[i] || 0) + ((genArr[i+1] || 0) << 3));
+        var reg = GetColorIndex(genArr[i]);
+        console.log("Register for colour detected: " + reg);        
+        
+        if(reg != -1) {
+            charsArr[charsArr.length] = reg;
+        } else {
+            charsArr[charsArr.length] = '';
+        }
+
         //charsArr[charsArr.length] = pxASCII;
 
         console.log("adding together " + genArr[i] + " & " + genArr[i+1]);
     }
+    
+}
+
+function GetColorIndex(cIn) {
+    //console.log("col reg: " + colIndex[1]);
+    for (var i=0; i < colIndex.length; i++) {
         
-    console.log(pxASCII);
+        console.log("Comparing: " + colIndex[i] + " with: " + cIn);
+        if(colIndex[i] == cIn) {
+            console.log("Colour index of input " + cIn + " is: " + i);
+            return i; //return index
+        }
+    }
+    return -1;
 }
 
 function ToggleColourMode(tog) {
@@ -488,312 +465,6 @@ function ToggleColourMode(tog) {
     }
 }
 
-//GridSquare, sprite with click support
-let gridSQR = Sprite({
-    x: 200,
-    y: 200,
-    width: gridPix+4,
-    height: gridPix+4,
-    color: 'black',
-    
-    onDown() {
-        this.color = 'red'
-        this.y +=2;
-    },
-    onUp() {
-        this.color = 'black'
-        this.y -=2;
-    },
-    onOver() {
-        this.color = 'grey'
-    },
-    onOut: function() {
-        this.color = 'black'
-    }
-
-});
-track(gridSQR);
-//console.log(gridSQR);
-
-const SideUI = Sprite({
-    type: 'obj',
-    x: canvas.width - sideUIX,
-    color: 'grey',
-    width: sideUIX,
-    height: canvas.height,
-});
-
-let textW = Text({
-    text: 'W:',
-    font: '16px Arial bold',
-    color: 'black',
-    x: widthUIX - 30,
-    y: 20,
-    anchor: {x: 0.5, y:0.5},
-    textAlign: 'center'
-});
-SideUI.addChild(textW);
-//console.log(textGen.text);
-
-let textH = Text({
-    text: 'H:',
-    font: '16px Arial bold',
-    color: 'black',
-    x: heightUIX - 30,
-    y: 20,
-    anchor: {x: 0.5, y:0.5},
-    textAlign: 'center'
-});
-SideUI.addChild(textH);
-//console.log(textGen.text);
-
-const butGry = new Image();
-const butBlu = new Image();
-butGry.src = 'assets/images/button_grey.png';
-butBlu.src = 'assets/images/button_blue.png';
-
-butBlu.onload = () => {
-    let buttonSet = Button({
-        x: 80,
-        y: 280,
-        anchor: {x:0.5, y:0.5},
-        image: butGry,
-
-        text: {
-            text: 'Generate',
-            color: 'grey',
-            font: '20px Arial, sans-serif',
-            anchor: {x: 0.5, y:0.5},
-        
-        },
-
-        // get text() {
-        //     return this.textNode;
-        // },
-        // set text(s) {
-        //     this.textNode = s;
-        // }, ////////////////////////////////////////////////////////////////////////
-
-        onDown() {
-            this.image = butBlu
-            this.y +=5;
-
-            //set back to 1-1 scale 
-            ResizeTo(renderIMG, 1/resize);
-            //process data and export
-            ConvertCanvastoImageData();
-            //clear, rescale, rebuild
-            BlankSprite();
-            ResizeTo(renderIMG, resize);
-            ReBuildSprite();
-        },
-        onUp() {
-            this.image = butGry
-            this.y -=5;
-        }
-    });
-    
-    buttonWPlus = Button({
-        x: widthUIX,
-        y: 50,
-        width: 22,
-        height: 22,
-        anchor: {x:0.5, y:0.5},
-        color: 'white',
-
-        text: {
-            text: '+',
-            color: 'black',
-            font: '16px Arial, sans-serif',
-            anchor: {x: 0.5, y:0.5}
-        },
-
-        onDown() {
-            UpdateGridX(0, true);
-            this.color = 'grey'
-            this.y +=2;
-        },
-        onUp() {
-            this.color = 'white'
-            this.y -=2;
-            //regenerate grid
-        }
-    });
-    
-    buttonWSub = Button({
-        x: widthUIX,
-        y: 75,
-        width: 22,
-        height: 22,
-        anchor: {x:0.5, y:0.5},
-        color: 'white',
-
-        text: {
-            text: '-',
-            color: 'black',
-            font: '16px Arial, sans-serif',
-            anchor: {x: 0.5, y:0.5}
-        },
-
-        onDown() {
-            UpdateGridX(0, false);
-            this.color = 'grey'
-            this.y +=2;
-        },
-        onUp() {
-            this.color = 'white'
-            this.y -=2;
-        }
-    });
-
-    buttonHPlus = Button({
-        x: heightUIX,
-        y: 50,
-        width: 22,
-        height: 22,
-        anchor: {x:0.5, y:0.5},
-        color: 'white',
-
-        text: {
-            text: '+',
-            color: 'black',
-            font: '16px Arial, sans-serif',
-            anchor: {x: 0.5, y:0.5}
-        },
-
-        onDown() {
-            UpdateGridY(1, true);
-            this.color = 'grey'
-            this.y +=2;
-        },
-        onUp() {
-            this.color = 'white'
-            this.y -=2;
-        }
-    });
-    
-    buttonHSub = Button({
-        x: heightUIX,
-        y: 75,
-        width: 22,
-        height: 22,
-        anchor: {x:0.5, y:0.5},
-        color: 'white',
-
-        text: {
-            text: '-',
-            color: 'black',
-            font: '16px Arial, sans-serif',
-            anchor: {x: 0.5, y:0.5}
-        },
-
-        onDown() {
-            UpdateGridY(1, false);
-            this.color = 'grey'
-            this.y +=2;
-        },
-        onUp() {
-            this.color = 'white'
-            this.y -=2;
-        }
-    });
-
-    const OneBit = Button({
-        type: '0',
-        x: 10,
-        y: 100,
-        color: '#999999',
-        width: 64,
-        height: 32,
-
-        // text properties
-        text: {
-            text: '1BIT',
-            color: 'black',
-            font: '20px Arial, sans-serif',
-            anchor: {x: -0.25, y: -0.35}
-        },
-        onDown() {
-            this.color = '#FFFFFF';
-            MultiCol.color = '#999999';
-            MultiCol.type = '0';
-            this.type = 1;
-
-            DisableArea2();
-            ToggleColourMode(false);
-        },
-        onUp() {
-            //this.color = 'grey'
-            //this.y -=2;
-        },
-        onOver() {
-            if(this.type == 0) {
-                this.color = '#AAAAAA'
-            }
-        },
-        onOut: function() {
-            if(this.type == 0) {
-                //this.color = 'rgb(153,153,153)';
-                this.color = '#999999'
-            } else {
-                this.color = '#FFFFFF'
-            }
-        }
-    });
-    const MultiCol = Button({
-        type: '1',
-        x: 85,
-        y: 100,
-        color: '#FFFFFF',
-        width: 64,
-        height: 32,
-
-        // text properties
-        text: {
-            text: 'MULTI',
-            color: 'black',
-            font: '20px Arial, sans-serif',
-            anchor: {x: -0.05, y: -0.35}
-        },
-        onDown() {
-            this.color = '#FFFFFF';
-            OneBit.color = '#999999';
-            OneBit.type = '0';
-            this.type = 1;
-            
-            EnableArea2();
-            ToggleColourMode(true);
-        },
-        onUp() {
-            //this.color = 'grey'
-            //this.y -=2;
-        },
-        onOver() {
-            if(this.type == 0) {
-                this.color = '#AAAAAA'
-            }
-        },
-        onOut: function() {
-            if(this.type == 0) {
-                //this.color = 'rgb(153,153,153)';
-                this.color = '#999999'
-            } else {
-                this.color = '#FFFFFF'
-            }
-        }
-    });
-
-    track(OneBit);
-    SideUI.addChild(OneBit);
-    track(MultiCol);
-    SideUI.addChild(MultiCol);
-
-    SideUI.addChild(buttonSet);
-    SideUI.addChild(buttonWPlus);
-    SideUI.addChild(buttonWSub);
-    SideUI.addChild(buttonHPlus);
-    SideUI.addChild(buttonHSub);
-};
 
 function GenerateExportText() {
     //debug
@@ -810,6 +481,14 @@ function GenerateExportText() {
         colString += "\n"
     }
 
+    var outStr = '';
+    if(multiMode) {
+        outStr = gridX + ',' + gridY + ',' + charsArr
+
+    } else {
+        outStr = gridX + ',' + gridY + ',' + hexArr
+    }
+
     textOutput.value = '[Generated Export Data]' + '\n'
     + 'Sprite dimensions: ' + gridX + "x" + gridY + "\nColours: " + colArr.length + '\n'
     + colString
@@ -818,46 +497,10 @@ function GenerateExportText() {
     + '////////////////Copy the below data segment////////////////' + '\n'
     + '\n'
 
-    + gridX + ',' + gridY + ',' + charsArr
-
+    + outStr
 
     + '\n \n'
     + '////////////////          End Data         ////////////////';
-}
-        
-//Height x Width section
-createBox(32, 32, SideUI, widthUIX-16, heightUIX - 126);
-createBox(32, 32, SideUI, widthUIX + 60, heightUIX - 126);
-createText(SideUI, widthUIX - 4 , heightUIX - 110, gridX);
-createText(SideUI, widthUIX + 72, heightUIX - 110, gridY);
-
-function createText(par, xLoc, yLoc, i) {
-        const tex = Text({
-            text: i,
-            font: '16px Arial bold',
-            color: 'black',
-            x: xLoc,
-            y: yLoc,
-            anchor: {x: 0.0, y:0.5},
-            textAlign: 'center'
-        });
-
-    par.addChild(tex);
-    uiTexts_01.push(tex);
-}
-
-function createBox(xSize, ySize, par, xLoc, yLoc) {
-    const box = Sprite({
-        x: xLoc,
-        y: yLoc,
-        color: 'white',
-        width: xSize,
-        height: ySize,
-
-    });
-
-    par.addChild(box);
-    uiObjs_01.push(box);
 }
 
 function createGrid(xIn, yIn) {
@@ -977,7 +620,6 @@ function BuildPixelGrid() {
             this.context.strokeRect(0, 0, this.width, this.height);
         }
     });
-    console.log('areax:' + areaX);
 
     //block fill colour since render() somehow breaks it
     Area1Col = Sprite({
@@ -1051,17 +693,14 @@ function GetColourValue() {
     //console.log('selected colour: ' + colCurrent);  
 }
 
-//GameLoop setup
-//Requires update & render functions
+//Main Loops
 const loop = GameLoop({
     update: () => {
         
         if(redraw) {
-            console.log("rebuilding grid");
             redraw = false;
 
             CleanUpGrid();
-
             BuildPixelGrid()
         }
 
@@ -1075,11 +714,12 @@ const loop = GameLoop({
         if(Area1) {
             Area1.render();
         }
-        SideUI.render();
 
-        // if(textObj) {
-        //     textObj.render();
-        // }
+        //render out each object in the render queue
+        renderQueue.ui.forEach(element => {
+            element.obj.render();
+        });
+
     },
 });
 
