@@ -1,10 +1,9 @@
 //Encoder functions, for compressing pixel art image data
 
 //First step in converting renderImage canvas to image data/compressed
-//calls CheckCol and SliceData
-function ConvertCanvastoImageData(cnv) {
+//Calls CheckCol and SliceData
+function ConvertCanvastoImageData(cnv, de) {
     let cntxt = cnv.getContext("2d");
-
     imageData = cntxt.getImageData(0, 0, cnv.width, cnv.height);
     imageDataByteLen.textContent = imageData.data.byteLength + ' bytes.';
     //console.log(imageData);
@@ -14,34 +13,72 @@ function ConvertCanvastoImageData(cnv) {
     const reader = new FileReader();
 
     reader.addEventListener('loadend', () => {
-        const arrayBuffer = reader.result;
-        bufferByteLen.textContent = arrayBuffer.byteLength + ' bytes.';
-            // Dispay Blob content in an Image.
-            const blob = new Blob([arrayBuffer], {type: mimeType});
-            imageOut.src = URL.createObjectURL(blob);
-            //console.log("height: " + imageOut.style.height.value);
-            imageOut.style.width = gridX*8 + 'px';
-            imageOut.style.height = gridY*8 + 'px';
-            console.log(arrayBuffer);
+            //Set array buffer
+            const arrayBuffer = reader.result;
+            bufferByteLen.textContent = arrayBuffer.byteLength + ' bytes.';
+            
+            arrayBuffOut = arrayBuffer;
+            //delimiter true == compressing image usage (used during encoding)
+            //delimiter false == set array buffer (used during decoding)
+            if(de) {    
+                //Blob content -> Image & URL
+                const blob = new Blob([arrayBuffer], {type: mimeType});        
+                imageOut.src = URL.createObjectURL(blob);
 
-            //var bufView = new Uint8Array(arrayBuffer);
-            var bufViewID = new Uint8Array(imageData.data);
-            //output to webpage
-            //textOutputBin.innerHTML = "[binary output]\n" + bufViewID;
+                //console.log("height: " + imageOut.style.height.value);
+                imageOut.style.width = gridX*8 + 'px';
+                imageOut.style.height = gridY*8 + 'px';
+                console.log(arrayBuffer);
+    
+                //var bufView = new Uint8Array(arrayBuffer);
+                var bufViewID = new Uint8Array(imageData.data);
+                //output to webpage
+                //textOutputBin.innerHTML = "[binary output]\n" + bufViewID;    
 
-            SliceData(bufViewID);
+                //slice and process drawn pixel art on canvas
+                SliceData(bufViewID);
+                //run export text gen 
+                //has to run in here, at the end of 'loadend'
+                GenerateExportText();
+                //return 0;
 
-            //run export text gen 
-            //has to run in here, at the end of 'loadend'
-            GenerateExportText();
+            } else {
+                //set data for usage external to this function
+                var img = new Image();
 
+                //console.log(arrayBuffer);
+                //console.log(arrayBuffOut);
+                
+                //Blob content -> Image & URL
+                const blob = new Blob([arrayBuffer], {type: mimeType});        
+                blobArr.push(blob);
+                //img.src = URL.createObjectURL(blob);
+                // //console.log("height: " + imageOut.style.height.value);
+                //img.style.width = 32 + 'px';
+                //img.style.height = 32 + 'px';
+                
+                // tstIMG.src = URL.createObjectURL(blob);
+                // tstIMG.style.width = 32 + 'px';
+                // tstIMG.style.height = 32 + 'px';
+                //console.log(tstIMG);
+                
+                //save
+                imageArray.push(img);
+                urlArray.push(img.src);
+
+                //find out when processing is done
+                if(imageArray.length == proccessNum) {
+                    console.log("Letters actually generated: " + imageArray.length);
+                    console.log("Blobs actually generated: " + blobArr.length);
+                    initProcessing = true;
+                }
+
+                //return arrayBuffer;
+            }
         });
-
         reader.readAsArrayBuffer(blob);
     }, mimeType);
-    
 }
-
 
 //run through arrayIN
 //checking colours col

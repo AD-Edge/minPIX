@@ -2,7 +2,7 @@
 
 //Decompiles sprite data (HEX compress)
 //renders in compile canvas
-function DecompileDrawSprite(data, x, y, size) {
+function DecompileDrawSprite(data, x, y, size, cvs) {
     console.log("Decompiling and rendering: " + data);
     var splitData = data.split(",");
 
@@ -38,9 +38,9 @@ function DecompileDrawSprite(data, x, y, size) {
     }
     
     //reset canvas and draw
-    cmpIMG.width = w * size;
-    cmpIMG.height = h * size;
-    DrawBinaryToCavas(cmctx, size, rows, w);
+    cvs.width = w * size;
+    cvs.height = h * size;
+    DrawBinaryToCavas(cvs.getContext("2d"), size, rows, w);
 
 }
 
@@ -70,30 +70,4 @@ function DrawBinaryToCavas(ctx, size, rows, width) {
         currX += size;
     }
     //console.log('Drew ' + string + ' at size ' + size);
-}
-
-//test function, build all letter sprites
-function ProcessTestLetters() {
-    console.log("Letters to generate: " + testLetters.length);
-    for(var i=0; i< testLetters.length; i++) {
-        var img = new Image();
-
-        //get first string
-        var pstr = testLetters[i];
-
-        //decompile
-        //render to canvas
-        DecompileDrawSprite(pstr, 0, 0, 5);        
-
-        //snapshot canvas
-
-        //create array buffer
-        //arrayBuffer = 
-
-        //const blob = new Blob([arrayBuffer], {type: mimeType});
-        //img.src = URL.createObjectURL(blob);
-
-        imageArray.push(img);
-    }
-    console.log("Letters actually generated: " + imageArray.length);
 }

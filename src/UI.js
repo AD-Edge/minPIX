@@ -80,7 +80,7 @@ butBlu.onload = () => {
             //set back to 1-1 scale 
             ResizeTo(renderIMG, 1/resize);
             //process data and export
-            ConvertCanvastoImageData(renderIMG);
+            ConvertCanvastoImageData(renderIMG, true);
             //clear, rescale, rebuild
             BlankSprite();
             ResizeTo(renderIMG, resize);

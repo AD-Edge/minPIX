@@ -54,19 +54,25 @@ let Area1 = null;
 let Area1Col = null;
 
 //experimental image gen
-var imageArray = []; //save all images here
+var imageArray = []; //save all generated images here
+var urlArray = []; //save all generated urls here
 const testImg = new Image();
-//var cmpIMG = document.getElementById('compileIMG');
-//var cmctx = cmpIMG.getContext("2d");
+var cmpIMG = document.getElementById('compileIMG');
+var tstIMG = document.getElementById('test');
+var cmctx = cmpIMG.getContext("2d");
 
 //canvas for rendering
 var renderIMG = document.getElementById('renderIMG');
 var rdctx = renderIMG.getContext("2d");
 renderIMG.width = gridX;
 renderIMG.height = gridY;
-var resize = 2;
+var resize = 16;
 var tempCanvas=document.createElement("canvas");
 var tctx=tempCanvas.getContext("2d");
+//outputs used during decoding process
+var arrayBuffOut = [];
+var initProcessing = false; //processing complete? 
+var initSetup = false;
 
 //image to bytes
 var imageData;
@@ -85,27 +91,62 @@ renderIMG.setAttribute('style', 'background-color:#666666')
 //initial setting of render image canvas
 ResizeTo(renderIMG, resize);
 
-var testData = "3,5,56,FA"; //sprite data test
-//DecompileDrawSprite(testData, 0, 0, 5);
+let testObj = null;
+let testUrl = '';
 
-//ProcessTestLetters();
+var blobArr = [];
+var proccessNum = testLetters.length;
+console.log("//Need to load " + proccessNum + " sprites//");
 
-//test data reconstruct object
-let testObj = Sprite({
-    x: 400,
-    y: 10,
-    width: 64,
-    height: 64,
-    image: testImg,
+ProcessTestLetters();
 
-    render: function() {
-      this.draw();
-      this.context.strokeStyle = 'red';
-      this.context.lineWidth = 1;
-      this.context.strokeRect(0, 0, this.width, this.height);
-      //DecompileDrawSprite(testData, this.x, this.y, 10);
+//test function, build all letter sprites
+function ProcessTestLetters() {
+    console.log("Letters to generate: " + testLetters.length);
+    for(var i=0; i< testLetters.length; i++) {
+        var img = new Image();
+
+        //get first string
+        var pstr = testLetters[i];
+
+        //decompile
+        //render to canvas
+        DecompileDrawSprite(pstr, 0, 0, 5, cmpIMG);
+        
+        arrayBuffOut = [];
+        arrayBuffOut.length = 0;
+        
+        ConvertCanvastoImageData(cmpIMG, false); 
+
+        //console.log("AB:");
+        //console.log(arrayBuffOut);
+
+        //Blob content -> Image & URL
+        //const blob = blobArr[1];        
+        //tstIMG.src = URL.createObjectURL(blob);
+        //console.log("height: " + imageOut.style.height.value);
+        //tstIMG.style.width = 32 + 'px';
+        //tstIMG.style.height = 32 + 'px';
+        
+        //save
+        //imageArray.push(img);
+        //urlArray.push(img.src);
     }
-});
+
+    // tstIMG.src = URL.createObjectURL(blobArr[1]);
+    // //console.log("height: " + imageOut.style.height.value);
+    // tstIMG.style.width = 32 + 'px';
+    // tstIMG.style.height = 32 + 'px';
+
+
+
+    //console.log("urls actually generated: " + urlArray.length);
+
+    // for(var i=0; i< urlArray.length;i++) {
+    //     console.log(urlArray[i]);
+    // }
+}
+
 
 //Draw a pixel in the renderImage canvas 
 function DrawRenderPixel(col, x, y) {
@@ -383,10 +424,41 @@ function GetColourValue() {
     //console.log('selected colour: ' + colCurrent);  
 }
 
+//Build anything that has to wait for pixel objects to generate
+function InitPixelObjects() {
+    const img2 = new Image();
+    img2.src = URL.createObjectURL(blobArr[0]);
+    //img2.src = 'assets/images/agent.png';
+
+    console.log(img2.src);
+        //test data reconstruct object
+        testObj = Sprite({
+            x: 400,
+            y: 10,
+            width: 64,
+            height: 64,
+            //image: tstIMG,
+            image: img2,
+    
+            render: function() {
+                this.draw();
+                this.context.strokeStyle = 'red';
+                this.context.lineWidth = 1;
+                this.context.strokeRect(0, 0, this.width, this.height);
+                //DecompileDrawSprite(testData, this.x, this.y, 10);
+            }
+        });
+}
+
 //Main Loops
 const loop = GameLoop({
     update: () => {
-        
+
+        if(initProcessing && !initSetup) {
+            InitPixelObjects();
+            initSetup = true;
+        }
+
         if(redraw) {
             redraw = false;
 
