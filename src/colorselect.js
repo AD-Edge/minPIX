@@ -5,6 +5,9 @@ var colorTxt = document.getElementById("color");
 var val = null;
 var colIndex = []; // current index
 
+//set to white to start with
+ClickSelect(1);
+
 //Disable multi colours
 function DisableArea2() {
     // This will disable all the children of the div
@@ -91,7 +94,7 @@ function ClickSelect(num) {
         //var val = document.getElementById("html5colorpicker0").value;
         val = null;
         SetColourText(val);
-        console.log("Colour of new selected: trasparent");
+        console.log("Colour of new selected: TRANSPARENT");
     } 
     else if (num == 1) {
         val = document.getElementById("html5colorpicker1").value;

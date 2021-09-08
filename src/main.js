@@ -265,7 +265,7 @@ function RecalcByteEstimate() {
 }
 
 //Creates pixel-art grid to draw on
-function createGrid(xIn, yIn) {
+function CreateGrid(xIn, yIn) {
         const gridSQR = Sprite({
             type: '0',
             x: xIn,
@@ -283,11 +283,13 @@ function createGrid(xIn, yIn) {
             },
             onDown() {
                 GetColourValue();
-                //colHEX = rgbToHex(colRGB);
-                //console.log("col in HEX: " + colCurrent);
-                this.color = colCurrent;
-                this.type = 1;
-
+                if(colCurrent == null) {
+                    this.color = '#999999';
+                    this.type = 0;
+                } else {
+                    this.color = colCurrent;
+                    this.type = 1;
+                }
                 //send to render Canvas
                 ReBuildSprite();
                 
@@ -363,7 +365,7 @@ function BuildPixelGrid() {
     
     for (let i=0; i < gridX; i++) {
         for (let j=0; j < gridY; j++) {
-            createGrid(i*gDim,j*gDim);
+            CreateGrid(i*gDim,j*gDim);
         }
     }
 
@@ -419,8 +421,12 @@ function UpdateGridY(i, pos) {
 }
 
 //Get currently selected colour
-function GetColourValue() { 
-    colCurrent = colSelect.style.backgroundColor;
+function GetColourValue() {
+    if(val == null) { //handle transparency
+        colCurrent = null;
+    } else {
+        colCurrent = colSelect.style.backgroundColor;
+    }
     //console.log('selected colour: ' + colCurrent);  
 }
 
