@@ -5,22 +5,21 @@
 function ConvertCanvastoImageData(cnv, de) {
     let cntxt = cnv.getContext("2d");
     imageData = cntxt.getImageData(0, 0, cnv.width, cnv.height);
-    imageDataByteLen.textContent = imageData.data.byteLength + ' bytes.';
     //console.log(imageData);
-
+    
     // Convert canvas to Blob, then Blob to ArrayBuffer.
     cnv.toBlob((blob) => {
-    const reader = new FileReader();
-
-    reader.addEventListener('loadend', () => {
+        const reader = new FileReader();
+        
+        reader.addEventListener('loadend', () => {
             //Set array buffer
             const arrayBuffer = reader.result;
-            bufferByteLen.textContent = arrayBuffer.byteLength + ' bytes.';
             
-            arrayBuffOut = arrayBuffer;
             //delimiter true == compressing image usage (used during encoding)
             //delimiter false == set array buffer (used during decoding)
             if(de) {    
+                imageDataByteLen.textContent = imageData.data.byteLength + ' bytes.';
+                bufferByteLen.textContent = arrayBuffer.byteLength + ' bytes.';
                 //Blob content -> Image & URL
                 const blob = new Blob([arrayBuffer], {type: mimeType});        
                 imageOut.src = URL.createObjectURL(blob);
@@ -71,6 +70,8 @@ function ConvertCanvastoImageData(cnv, de) {
                     console.log("Letters actually generated: " + imageArray.length);
                     console.log("Blobs actually generated: " + blobArr.length);
                     initProcessing = true;
+
+
                 }
 
                 //return arrayBuffer;

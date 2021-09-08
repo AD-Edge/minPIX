@@ -117,34 +117,7 @@ function ProcessTestLetters() {
         arrayBuffOut.length = 0;
         
         ConvertCanvastoImageData(cmpIMG, false); 
-
-        //console.log("AB:");
-        //console.log(arrayBuffOut);
-
-        //Blob content -> Image & URL
-        //const blob = blobArr[1];        
-        //tstIMG.src = URL.createObjectURL(blob);
-        //console.log("height: " + imageOut.style.height.value);
-        //tstIMG.style.width = 32 + 'px';
-        //tstIMG.style.height = 32 + 'px';
-        
-        //save
-        //imageArray.push(img);
-        //urlArray.push(img.src);
     }
-
-    // tstIMG.src = URL.createObjectURL(blobArr[1]);
-    // //console.log("height: " + imageOut.style.height.value);
-    // tstIMG.style.width = 32 + 'px';
-    // tstIMG.style.height = 32 + 'px';
-
-
-
-    //console.log("urls actually generated: " + urlArray.length);
-
-    // for(var i=0; i< urlArray.length;i++) {
-    //     console.log(urlArray[i]);
-    // }
 }
 
 
@@ -439,10 +412,10 @@ function InitPixelObjects() {
     console.log(img2.src);
         //test data reconstruct object
         testObj = Sprite({
-            x: 400,
-            y: 10,
-            width: 64,
-            height: 64,
+            x: 50,
+            y: 280,
+            width: 32,
+            height: 32,
             //image: tstIMG,
             image: img2,
     
@@ -461,7 +434,7 @@ const loop = GameLoop({
     update: () => {
 
         if(initProcessing && !initSetup) {
-            InitPixelObjects();
+            //InitPixelObjects();
             initSetup = true;
         }
 
