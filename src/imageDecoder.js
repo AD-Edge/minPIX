@@ -1,3 +1,4 @@
+//Decoder functions, for decoding compressed pixel art image data
 
 //Decompiles sprite data (HEX compress)
 //renders in compile canvas
@@ -69,4 +70,30 @@ function DrawBinaryToCavas(ctx, size, rows, width) {
         currX += size;
     }
     //console.log('Drew ' + string + ' at size ' + size);
+}
+
+//test function, build all letter sprites
+function ProcessTestLetters() {
+    console.log("Letters to generate: " + testLetters.length);
+    for(var i=0; i< testLetters.length; i++) {
+        var img = new Image();
+
+        //get first string
+        var pstr = testLetters[i];
+
+        //decompile
+        //render to canvas
+        DecompileDrawSprite(pstr, 0, 0, 5);        
+
+        //snapshot canvas
+
+        //create array buffer
+        //arrayBuffer = 
+
+        //const blob = new Blob([arrayBuffer], {type: mimeType});
+        //img.src = URL.createObjectURL(blob);
+
+        imageArray.push(img);
+    }
+    console.log("Letters actually generated: " + imageArray.length);
 }

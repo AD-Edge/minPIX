@@ -1,11 +1,10 @@
-
+//Simple utility functions
 function componentToHex(comp) {
     var hex = (parseInt(comp).toString(16)).toUpperCase();
     console.log("decimal " + comp + ", to hex: " + hex);
     //return hex.length == 1 ? "0" + hex : hex;
     return hex;
 }
-
 
 function rgbToHex(rgb) {
     var a = rgb.split(",");

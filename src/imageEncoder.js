@@ -1,3 +1,5 @@
+//Encoder functions, for compressing pixel art image data
+
 //First step in converting renderImage canvas to image data/compressed
 //calls CheckCol and SliceData
 function ConvertCanvastoImageData(cnv) {

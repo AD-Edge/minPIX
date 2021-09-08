@@ -1,3 +1,5 @@
+//Functions for colour registers 
+//Interacting between HTML registers and kontraJS
 var colSelect = document.getElementById("colourSelect");
 var colorTxt = document.getElementById("color");
 var val = null;

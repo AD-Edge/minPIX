@@ -1,4 +1,4 @@
-//UI Functions and creation
+//minPIX GUI Functions & Creation
 const butGry = new Image();
 const butBlu = new Image();
 butGry.src = 'assets/images/button_grey.png';

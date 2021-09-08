@@ -1,3 +1,5 @@
+//Render Queue functions for kontraJS render loop
+
 let renderQueue = {
     ui: [],
     background: [],

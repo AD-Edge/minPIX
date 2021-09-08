@@ -1,4 +1,4 @@
-
+//Main minPIX functions and setup
 const { init, GameLoop, GameObject, Text, load, setImagePath, Sprite, 
     initPointer, imageAssets, track, pointer, Button} = kontra;
 

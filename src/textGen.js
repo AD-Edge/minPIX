@@ -1,4 +1,4 @@
-//sprite data test
+//various sprite data test letters
 const testLetters = [
     "3,5,56,FA",
     "3,5,F7,5E",
