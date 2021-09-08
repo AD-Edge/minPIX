@@ -44,7 +44,9 @@ function SetColourText(x) {
 
 function GetColourRegs() {
     UpdateColourReg();
-    
+    for(var i=0; i< colIndexGrab.length; i++) {
+        console.log("Register " + i + ": " + colIndexGrab[i]);
+    }
     return colIndexGrab; 
 }
 
@@ -53,30 +55,35 @@ function UpdateColourReg() {
     
     colIndexGrab[1] = document.getElementById("html5colorpicker1").value;
     colIndexGrab[1] = colIndexGrab[1].charAt(1) 
-                        + colIndexGrab[1].charAt(2) 
-                            + colIndexGrab[1].charAt(3);
+                        + colIndexGrab[1].charAt(3) 
+                            + colIndexGrab[1].charAt(5);
     colIndexGrab[2] = document.getElementById("html5colorpicker2").value;
     colIndexGrab[2] = colIndexGrab[2].charAt(1) 
-                        + colIndexGrab[2].charAt(2) 
-                            + colIndexGrab[2].charAt(3);
+                        + colIndexGrab[2].charAt(3) 
+                            + colIndexGrab[2].charAt(5);
     colIndexGrab[3] = document.getElementById("html5colorpicker3").value;
     colIndexGrab[3] = colIndexGrab[3].charAt(1) 
-                        + colIndexGrab[3].charAt(2) 
-                            + colIndexGrab[3].charAt(3);
+                        + colIndexGrab[3].charAt(3) 
+                            + colIndexGrab[3].charAt(5);
     colIndexGrab[4] = document.getElementById("html5colorpicker4").value;
     colIndexGrab[4] = colIndexGrab[4].charAt(1) 
-                        + colIndexGrab[4].charAt(2) 
-                            + colIndexGrab[4].charAt(3);
+                        + colIndexGrab[4].charAt(3) 
+                            + colIndexGrab[4].charAt(5);
     
     colIndexGrab[5] = document.getElementById("html5colorpicker5").value;
     colIndexGrab[5] = colIndexGrab[5].charAt(1) 
-                        + colIndexGrab[5].charAt(2) 
-                            + colIndexGrab[5].charAt(3);
+                        + colIndexGrab[5].charAt(3) 
+                            + colIndexGrab[5].charAt(5);
     
     colIndexGrab[6] = document.getElementById("html5colorpicker6").value;
     colIndexGrab[6] = colIndexGrab[6].charAt(1) 
-                        + colIndexGrab[6].charAt(2) 
-                            + colIndexGrab[6].charAt(3);
+                        + colIndexGrab[6].charAt(3) 
+                            + colIndexGrab[6].charAt(5);
+
+    colIndexGrab[7] = document.getElementById("html5colorpicker7").value;
+    colIndexGrab[7] = colIndexGrab[7].charAt(1) 
+                        + colIndexGrab[7].charAt(3) 
+                            + colIndexGrab[7].charAt(5);
 
 }
 

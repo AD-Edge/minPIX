@@ -119,22 +119,22 @@ function ProcessTestLetters() {
     console.log("Letters actually generated: " + imageArray.length);
 }
 
-// //test data reconstruct object
-// let testObj = Sprite({
-//     x: 400,
-//     y: 10,
-//     width: 64,
-//     height: 64,
-//     image: testImg,
+//test data reconstruct object
+let testObj = Sprite({
+    x: 400,
+    y: 10,
+    width: 64,
+    height: 64,
+    image: testImg,
 
-//     render: function() {
-//       this.draw();
-//       this.context.strokeStyle = 'red';
-//       this.context.lineWidth = 1;
-//       this.context.strokeRect(0, 0, this.width, this.height);
-//       //DecompileDrawSprite(testData, this.x, this.y, 10);
-//     }
-// });
+    render: function() {
+      this.draw();
+      this.context.strokeStyle = 'red';
+      this.context.lineWidth = 1;
+      this.context.strokeRect(0, 0, this.width, this.height);
+      //DecompileDrawSprite(testData, this.x, this.y, 10);
+    }
+});
 
 //Decompiles sprite data (HEX compress)
 //renders in compile canvas
@@ -494,28 +494,39 @@ function ProcessMultiColourData() {
     for(var i=0; i<genArr.length; i+=2) {
         //pxASCII += String.fromCharCode(0b1000000 + 
             //(genArr[i] || 0) + ((genArr[i+1] || 0) << 3));
-        var reg = GetColorIndex(genArr[i]);
-        console.log("Register for colour detected: " + reg);        
+        var regA = GetColorIndex(genArr[i]);
+        var regB = GetColorIndex(genArr[i+1]);
         
-        if(reg != -1) {
-            charsArr[charsArr.length] = reg;
+        if(regA == -1) {
+            regA = 0;
+        }
+        if(regB == -1) {
+            regB = 0;
+        }
+        console.log("Register for colour detected: " + regA.toString() + regB.toString());        
+        
+        var rtoHex = componentToHex(regA.toString() + regB.toString());
+
+        if(rtoHex != 0) {
+
+            charsArr[charsArr.length] = rtoHex;
+            //console.log("adding together " + genArr[i] + " & " + genArr[i+1]);
+            console.log("adding together " + regA + " & " + regB);
+            console.log("which makes " + rtoHex);
+            
+            //need to make this hex value and add it to charsArr instead of register num
         } else {
             charsArr[charsArr.length] = '';
         }
-
         //charsArr[charsArr.length] = pxASCII;
-
-        console.log("adding together " + genArr[i] + " & " + genArr[i+1]);
     }
-    
 }
 
 //Finds the register of a colour, if one of that colour exists
 function GetColorIndex(cIn) {
     //console.log("col reg: " + colIndex[1]);
     for (var i=0; i < colIndex.length; i++) {
-        
-        console.log("Comparing: " + colIndex[i] + " with: " + cIn);
+        //console.log("Comparing: " + colIndex[i] + " with: " + cIn);
         if(colIndex[i] == cIn) {
             console.log("Colour index of input " + cIn + " is: " + i);
             return i; //return index
