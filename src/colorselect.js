@@ -33,7 +33,7 @@ function EnableArea2() {
 
 
 function UpdateColour(num) {
-    console.log('colour updated: ' + num);
+    //console.log('colour updated: ' + num);
     ClickSelect(num);
     
     return false;
@@ -94,42 +94,42 @@ function ClickSelect(num) {
         //var val = document.getElementById("html5colorpicker0").value;
         val = null;
         SetColourText(val);
-        console.log("Colour of new selected: TRANSPARENT");
+        console.log("Colour selected: TRANSPARENT");
     } 
     else if (num == 1) {
         val = document.getElementById("html5colorpicker1").value;
         SetColourText(val);
-        console.log("Colour of new selected: " + val);
+        console.log("Colour selected: " + val);
     } 
     else if (num == 2) {
         val = document.getElementById("html5colorpicker2").value;
         SetColourText(val);
-        console.log("Colour of new selected: " + val);
+        console.log("Colour selected: " + val);
     }
     else if (num == 3) {
         val = document.getElementById("html5colorpicker3").value;
         SetColourText(val);
-        console.log("Colour of new selected: " + val);
+        console.log("Colour selected: " + val);
     }
     else if (num == 4) {
         val = document.getElementById("html5colorpicker4").value;
         SetColourText(val);
-        console.log("Colour of new selected: " + val);
+        console.log("Colour selected: " + val);
     }
     else if (num == 5) {
         val = document.getElementById("html5colorpicker5").value;
         SetColourText(val);
-        console.log("Colour of new selected: " + val);
+        console.log("Colour selected: " + val);
     }
     else if (num == 6) {
         val = document.getElementById("html5colorpicker6").value;
         SetColourText(val);
-        console.log("Colour of new selected: " + val);
+        console.log("Colour selected: " + val);
     }
     else if (num == 7) {
         val = document.getElementById("html5colorpicker7").value;
         SetColourText(val);
-        console.log("Colour of new selected: " + val);
+        console.log("Colour selected: " + val);
     }
 
 

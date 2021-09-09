@@ -1,6 +1,6 @@
 //various sprite data test letters
 const tl = [
-    "3,5,F2,4E", //A
+    "3,5,56,FA", //A
     "3,5,D7,5C", //B
     "3,5,F2,4E", //C
     "3,5,D6,DC", //D

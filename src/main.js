@@ -95,29 +95,47 @@ let testObj = null;
 let testUrl = '';
 
 var blobArr = [];
-var proccessNum = testLetters.length;
-console.log("//Need to load " + proccessNum + " sprites//");
 
-ProcessTestLetters();
+//debug test rendering and processing of textGen.txt letters
+//ProcessTestLetters();
 
 //test function, build all letter sprites
 function ProcessTestLetters() {
-    console.log("Letters to generate: " + testLetters.length);
-    for(var i=0; i< testLetters.length; i++) {
-        var img = new Image();
+    console.log("//Need to load " + tl.length + " sprites//");
+    for(var i=0; i< tl.length; i++) {
+
 
         //get first string
-        var pstr = testLetters[i];
+        var pstr = tl[i];
 
         //decompile
         //render to canvas
         DecompileDrawSprite(pstr, 0, 0, 5, cmpIMG);
-        
-        arrayBuffOut = [];
-        arrayBuffOut.length = 0;
-        
+                
         ConvertCanvastoImageData(cmpIMG, false); 
     }
+}
+
+function ProcessTestLetterImages() {
+
+    for(var i=0; i< blobArr.length; i++) {
+        
+        const newImg = new Image();
+        newImg.src = URL.createObjectURL(blobArr[i]);
+
+        var imgW = tl[i].charAt(0) * 4;
+        var imgH = tl[i].charAt(2) * 4;
+
+        //set image size 
+        newImg.width = imgW;
+        newImg.height = imgH;
+
+        imageArray.push(newImg);
+    }
+
+    initProcessing = true;
+    console.log("Images generated: " + imageArray.length);
+
 }
 
 
@@ -403,30 +421,61 @@ function GetColourValue() {
     //console.log('selected colour: ' + colCurrent);  
 }
 
+function GenerateString(str) {
+    var s = 0;
+
+    //get string
+    for(var i=0; i<str.length;i++) {
+        var n = str.charCodeAt(i) - 96;
+
+        if(imageArray[n]) { //check letter exists
+            //console.log("Letter " + str[i] + " pos in alphabet: " + n);
+            
+            s += imageArray[n].width + 6;
+            console.log("Rendering " + str[i] 
+                + " width is " + imageArray[n].width + " position: " + s);
+    
+            CreateLetter(n-1, s, 0);
+        }
+        else {
+            s += 10;//space
+        }
+    }
+}
+function CreateLetter(i, xIn, yIn) {
+    
+    const ASpt = Sprite({
+        x: xIn,
+        y: yIn,
+        width: 32,
+        height: 32,
+        image: imageArray[i],
+    });
+
+    testObj.addChild(ASpt);
+}
+
 //Build anything that has to wait for pixel objects to generate
 function InitPixelObjects() {
-    const img2 = new Image();
-    img2.src = URL.createObjectURL(blobArr[0]);
-    //img2.src = 'assets/images/agent.png';
+        
+    //test string hosting object
+    testObj = Sprite({
+        x: 40,
+        y: 280,
+        width: 400,
+        height: 32,
+        //image: imageArray[0],
 
-    console.log(img2.src);
-        //test data reconstruct object
-        testObj = Sprite({
-            x: 50,
-            y: 280,
-            width: 32,
-            height: 32,
-            //image: tstIMG,
-            image: img2,
-    
-            render: function() {
-                this.draw();
-                this.context.strokeStyle = 'red';
-                this.context.lineWidth = 1;
-                this.context.strokeRect(0, 0, this.width, this.height);
-                //DecompileDrawSprite(testData, this.x, this.y, 10);
-            }
-        });
+        render: function() {
+            this.draw();
+            this.context.strokeStyle = 'red';
+            this.context.lineWidth = 1;
+            this.context.strokeRect(0, 0, this.width, this.height);
+        }
+    });
+
+    //img2.src = URL.createObjectURL(blobArr[28]);
+    GenerateString("subspace zero");
 }
 
 //Main Loops
@@ -434,9 +483,14 @@ const loop = GameLoop({
     update: () => {
 
         if(initProcessing && !initSetup) {
-            //InitPixelObjects();
+            //ProcessTestLetterImages();
+            InitPixelObjects();
             initSetup = true;
         }
+        //for(var i=0; i< tl.length; i++) {
+            //img2.src = URL.createObjectURL(blobArr[5]);
+          //  this.image = img2;
+        //}
 
         if(redraw) {
             redraw = false;

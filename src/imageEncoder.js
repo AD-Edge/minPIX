@@ -62,15 +62,16 @@ function ConvertCanvastoImageData(cnv, de) {
                 //console.log(tstIMG);
                 
                 //save
-                imageArray.push(img);
-                urlArray.push(img.src);
+                //imageArray.push(img);
+                //urlArray.push(img.src);
 
                 //find out when processing is done
-                if(imageArray.length == proccessNum) {
-                    console.log("Letters actually generated: " + imageArray.length);
+                if(blobArr.length == tl.length) {
+                    //console.log("Letters actually generated: " + imageArray.length);
                     console.log("Blobs actually generated: " + blobArr.length);
-                    initProcessing = true;
-
+                    
+                    ProcessTestLetterImages();
+                    //initProcessing = true;
 
                 }
 

@@ -3,15 +3,15 @@
 //Decompiles sprite data (HEX compress)
 //renders in compile canvas
 function DecompileDrawSprite(data, x, y, size, cvs) {
-    console.log("Decompiling and rendering: " + data);
+    console.log("Decompiling: " + data);
     var splitData = data.split(",");
 
     //1 bit for now
     context.fillStyle = 'black';
     
     //get dimensions 
-    var w = splitData[0];
-    var h = splitData[1];
+    w = splitData[0];
+    h = splitData[1];
 
     var bin = [];
     var rows = [];
@@ -36,17 +36,16 @@ function DecompileDrawSprite(data, x, y, size, cvs) {
             }
         }
     }
-    
     //reset canvas and draw
     cvs.width = w * size;
     cvs.height = h * size;
-    DrawBinaryToCavas(cvs.getContext("2d"), size, rows, w);
+    DrawBinaryToCavas(cvs.getContext("2d"), size, rows);
 
 }
 
 //draws decompiled sprite to canvas
 //to be saved as image
-function DrawBinaryToCavas(ctx, size, rows, width) {
+function DrawBinaryToCavas(ctx, size, rows) {
     //build sprite from binary (~format of previous stuff)
     context.fillStyle = 'black';
     var currX = 0;
