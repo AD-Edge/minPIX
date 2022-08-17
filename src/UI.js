@@ -13,6 +13,9 @@ var SideUI = null;
 let uiObjs_01 = [];
 let uiTexts_01 = [];
 
+var MultiCol = null;
+var OneBit = null;
+
 SideUI = Sprite({
     type: 'obj',
     x: canvas.width - sideUIX,
@@ -218,7 +221,7 @@ butBlu.onload = () => {
         }
     });
 
-    const OneBit = Button({
+    OneBit = Button({
         type: '0',
         x: 10,
         y: 100,
@@ -241,6 +244,7 @@ butBlu.onload = () => {
 
             DisableArea2();
             ToggleColourMode(false);
+            
         },
         onUp() {
             //this.color = 'grey'
@@ -260,7 +264,7 @@ butBlu.onload = () => {
             }
         }
     });
-    const MultiCol = Button({
+    MultiCol = Button({
         type: '1',
         x: 85,
         y: 100,

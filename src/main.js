@@ -33,6 +33,8 @@ var areaY = gridPix * gridY;
 var gDim = areaX / gridX;
 var pixThic = 1;
 
+var timerTog = 1.5;
+
 var currentOver = null;
 
 //Array for cells
@@ -66,7 +68,7 @@ var renderIMG = document.getElementById('renderIMG');
 var rdctx = renderIMG.getContext("2d");
 renderIMG.width = gridX;
 renderIMG.height = gridY;
-var resize = 16;
+var resize = 8;
 var tempCanvas=document.createElement("canvas");
 var tctx=tempCanvas.getContext("2d");
 //outputs used during decoding process
@@ -150,6 +152,7 @@ function DrawRenderPixel(col, x, y) {
 function ReBuildSprite() {
     //set back to 1-1 scale 
     //ResizeTo(renderIMG, 1/resize);
+    BlankSprite();
     //redraw pixels
     for(let i = 0; i< cells.length; i++) {
         //get colour
@@ -476,6 +479,7 @@ function InitPixelObjects() {
 
     //img2.src = URL.createObjectURL(blobArr[28]);
     GenerateString("subspace zero");
+    
 }
 
 //Main Loops
@@ -487,6 +491,7 @@ const loop = GameLoop({
             InitPixelObjects();
             initSetup = true;
         }
+
         //for(var i=0; i< tl.length; i++) {
             //img2.src = URL.createObjectURL(blobArr[5]);
           //  this.image = img2;
@@ -494,7 +499,6 @@ const loop = GameLoop({
 
         if(redraw) {
             redraw = false;
-
             CleanUpGrid();
             BuildPixelGrid()
         }
@@ -514,6 +518,20 @@ const loop = GameLoop({
         renderQueue.ui.forEach(element => {
             element.obj.render();
         });
+
+
+        if(timerTog > 0) {
+            timerTog-=0.1;
+            if(timerTog <= 0) {
+                //toggle to 1bit mode on start    
+                OneBit.color = '#FFFFFF';
+                OneBit.type = 1;
+                MultiCol.color = '#999999';
+                MultiCol.type = '0';
+                DisableArea2();
+                ToggleColourMode(false);
+            }
+        }
 
         if(testObj) {
             testObj.render();
