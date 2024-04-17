@@ -1,8 +1,6 @@
 # minPIX
 Minimal pixel editor. To generate highly compressed pixel art data (measured in bytes!) for gamejams like js13k. 
 
-![IMGDEMO](/screenshots/bulba_video_demo.mp4)
+<blockquote class="imgur-embed-pub" lang="en" data-id="a/NM29XmM" data-context="false" ><a href="//imgur.com/a/NM29XmM"></a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
 
-
-
-<video src="https://github.com/AD-Edge/minPIX/blob/main/screenshots/bulba_video_demo.mp4" width="640" />
+[![Video](https://i.imgur.com/3oKzAX4.mp4)](https://i.imgur.com/3oKzAX4.mp4)
